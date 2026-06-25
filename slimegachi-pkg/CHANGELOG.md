@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.7.0 — storage keyed by {tokenId, serial}
+
+Pet state now follows the NFT, not the wallet — so a pet's care history survives trades and syncs across devices.
+
+- **Per-pet state** is now persisted under `pet:{tokenId}:{serial}` (stats, sick flag, care count, name), replacing the old account-scoped key. Any holder of a given serial loads the same pet record. The in-memory pet key is likewise account-independent (`{tokenId}-{serial}`).
+- **Per-player state** (coins, login streak, achievements, daily quests, collection) is split out under `player:{accountId}` — it's inherently per-person and stays with the account.
+- **Demo/stub** play is namespaced as `demo:pet:…` so it never collides with a real holder's record for the same serial.
+- The `storage` adapter interface is unchanged (`load`/`save`/`remove`) — it's just called with the new keys, and the two key kinds map 1:1 onto the `slimegachi_pets` / `slimegachi_players` tables in the README's production schema.
+- **Breaking for existing saves**: state under the old `{accountId}:v1` blob is not migrated (orphaned, not lost). Pre-launch, so no live data is affected.
+
 ## 1.6.0 — audio pass
 
 All audio is synthesized live via the Web Audio API — zero asset files, no recordings. Degrades silently to "no audio" if the context is blocked.

@@ -138,7 +138,7 @@ The `getState()` snapshot shape:
 }
 ```
 
-`SLIMEgachi.version` is a string on the namespace, useful for debugging compatibility (`'1.5.0'` at the time of writing).
+`SLIMEgachi.version` is a string on the namespace, useful for debugging compatibility (`'1.7.0'` at the time of writing).
 
 ---
 
@@ -202,7 +202,12 @@ Arrays are tried in order; first success wins.
 
 ## Storage
 
-By default, pet state, coins, achievements, and login streak are persisted to `localStorage` under the key `slimegachi:{accountId}:v1`. That's fine for single-device play, but breaks across devices and NFT transfers. See [Storage architecture](#storage-architecture) below for context.
+State is persisted to `localStorage` (by default) under **two kinds of key**, so a pet's care history follows the NFT rather than the wallet:
+
+- **Per-pet** — `pet:{tokenId}:{serial}` — stats, sick flag, care count, name. Keyed by the NFT, so it survives trades and syncs across devices (any holder of serial #274 loads the same record). Demo/stub play is namespaced separately as `demo:pet:…` and never touches real records.
+- **Per-player** — `player:{accountId}` — coins, login streak, achievements, daily quests, collection stats. Inherently per-person, so it stays with the account.
+
+That's the production-shaped split out of the box. See [Storage architecture](#storage-architecture) below for the matching backend schema.
 
 ### Custom storage adapter
 
@@ -352,14 +357,14 @@ The widget is mobile-portrait first. It does work on desktop but centers within 
 
 Important context for whoever's wiring this into a production site:
 
-**Current default (localStorage)**: state lives per browser, per origin. Clears with cookies, doesn't sync across devices, doesn't transfer with NFT trades.
+**Default (localStorage)**: the key scheme is already production-shaped — per-pet state keyed by `{tokenId, serial}`, per-player state by `{accountId}` (see [Storage](#storage)). What localStorage *can't* do is persist server-side or sync across devices: it lives per browser, per origin, and clears with cookies.
 
-**For production**, you almost certainly want pet state in your backend, keyed by `{tokenId, serial}` rather than `{accountId, serial}`. That way:
+**For production**, pass a `storage` adapter that hits your backend using those same keys. Because pet state is already keyed by `{tokenId, serial}`, no game logic changes:
 - State persists when an NFT trades (new owner inherits care)
 - State persists across devices (sign in anywhere, see your pet)
 - You can build leaderboards, cross-holder features, etc.
 
-A reasonable schema:
+The two key kinds map 1:1 onto the two tables below — `pet:{tokenId}:{serial}` → `slimegachi_pets`, `player:{accountId}` → `slimegachi_players`:
 
 ```sql
 create table slimegachi_pets (
@@ -438,7 +443,7 @@ Features:
 ## Versioning
 
 ```js
-SLIMEgachi.version  // → '1.5.0'
+SLIMEgachi.version  // → '1.7.0'
 ```
 
 The widget follows semver loosely: minor versions add features without breaking the public API; saved player data backfills missing fields with safe defaults across versions. See `CHANGELOG.md` for the full history.

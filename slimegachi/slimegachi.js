@@ -794,16 +794,27 @@
     onInternal('minigame_complete', (ev) => { if (!ev.forfeit) Sound.play('gameover'); });
 
     function now() { return Date.now() + State.devTimeOffset; }
-    function storageKey() { return (State.account || 'stub') + ':v1'; }
+
+    /* Storage keys. Per-pet gameplay state is keyed by {tokenId, serial} so it
+       survives NFT trades and syncs across devices (a pet's care history follows
+       the NFT, not the wallet). Player-level state — coins, login streak,
+       achievements, quests, collection — is inherently per-person, so it stays
+       keyed by account. */
+    function petStorageKey(serial) {
+      /* Demo/stub play is a throwaway sandbox — keep it out of the real
+         {tokenId, serial} namespace so it never collides with a live holder's
+         pet record for the same serial. */
+      return (State.stubMode ? 'demo:' : '') + 'pet:' + options.tokenId + ':' + serial;
+    }
+    function playerStorageKey() { return 'player:' + (State.account || 'stub'); }
 
     /* ----- Persistence ----- */
     async function persist() {
       if (State.saveTimer) clearTimeout(State.saveTimer);
       State.saveTimer = setTimeout(async () => {
         try {
-          await options.storage.save(storageKey(), {
-            pets: State.pets,
-            activeKey: State.activeKey,
+          /* Player record (per account) */
+          await options.storage.save(playerStorageKey(), {
             coins: State.coins,
             achievements: State.achievements,
             lastLoginDay: State.lastLoginDay,
@@ -812,6 +823,17 @@
             quests: State.quests,
             collection: State.collection
           });
+          /* Per-pet records (per {tokenId, serial}) */
+          for (const k of Object.keys(State.pets)) {
+            const p = State.pets[k];
+            await options.storage.save(petStorageKey(p.serial), {
+              stats: p.stats,
+              lastTick: p.lastTick,
+              sick: p.sick,
+              care_count: p.care_count,
+              name: p.name
+            });
+          }
         } catch (e) { /* silent */ }
       }, SAVE_DEBOUNCE_MS);
     }
@@ -897,16 +919,22 @@
 
     /* ----- Pet state helpers ----- */
     function freshStats() { return { hunger: 80, happy: 80, energy: 80, clean: 90 }; }
-    function petKey(owned) { return (State.account || 'stub') + '-' + owned.pet + '-' + owned.serial; }
+    /* In-memory key for State.pets. Account-independent (keyed by serial within
+       the token) so a pet's state is the same object regardless of who holds it. */
+    function petKey(owned) { return options.tokenId + '-' + owned.serial; }
     function activePet() { return State.activeKey ? State.pets[State.activeKey] : null; }
-    function ensurePetState(owned) {
+    async function ensurePetState(owned) {
       const k = petKey(owned);
       if (!State.pets[k]) {
+        /* Load this pet's own record (by {tokenId, serial}); fall back to fresh. */
+        const rec = await options.storage.load(petStorageKey(owned.serial));
         State.pets[k] = {
-          stats: freshStats(), lastTick: now(),
+          stats: (rec && rec.stats) || freshStats(),
+          lastTick: (rec && rec.lastTick) || now(),
           name: owned.name, pet: owned.pet, serial: owned.serial,
-          traits: owned.traits || {}, sick: false,
-          care_count: 0
+          traits: owned.traits || {},
+          sick: (rec && rec.sick) || false,
+          care_count: (rec && rec.care_count) || 0
         };
       } else {
         State.pets[k].name = owned.name;
@@ -2381,9 +2409,8 @@
       if (devMode) devMode.textContent = State.stubMode ? 'demo' : 'mirror';
       setStatus(!State.stubMode && accountId ? 'Loading from mirror node…' : null, 'info');
 
-      const saved = await options.storage.load(storageKey());
+      const saved = await options.storage.load(playerStorageKey());
       if (saved) {
-        State.pets = saved.pets || {};
         State.coins = saved.coins || 0;
         State.achievements = saved.achievements || {};
         State.lastLoginDay = saved.lastLoginDay || null;
@@ -2392,11 +2419,14 @@
         State.quests = saved.quests || { day: null, slate: [] };
         State.collection = saved.collection || { totalActions: 0, foodsTried: {}, gamesPlayed: {}, milestonesReached: 0 };
       } else {
-        State.pets = {}; State.coins = 0; State.achievements = {};
+        State.coins = 0; State.achievements = {};
         State.lastLoginDay = null; State.loginStreak = 0; State.thrivingStartTime = null;
         State.quests = { day: null, slate: [] };
         State.collection = { totalActions: 0, foodsTried: {}, gamesPlayed: {}, milestonesReached: 0 };
       }
+      /* Per-pet records are loaded individually (by {tokenId, serial}) in the
+         ensurePetState loop below, so a traded-in pet brings its own history. */
+      State.pets = {};
 
       if (State.stubMode || !accountId) {
         State.ownedPets = [
@@ -2414,7 +2444,7 @@
         }
       }
 
-      for (const o of State.ownedPets) ensurePetState(o);
+      for (const o of State.ownedPets) await ensurePetState(o);
       applyDecay();
       checkLoginStreak();
       refreshQuestsIfNewDay();
@@ -2508,12 +2538,13 @@
       });
       $('dev-reset').addEventListener('click', async () => {
         if (!confirm('Reset all state for this account?')) return;
-        await options.storage.remove(storageKey());
+        await options.storage.remove(playerStorageKey());
+        for (const o of State.ownedPets) await options.storage.remove(petStorageKey(o.serial));
         State.pets = {}; State.coins = 0; State.achievements = {};
         State.loginStreak = 0; State.lastLoginDay = null; State.thrivingStartTime = null;
         State.quests = { day: null, slate: [] };
         State.collection = { totalActions: 0, foodsTried: {}, gamesPlayed: {}, milestonesReached: 0 };
-        for (const o of State.ownedPets) ensurePetState(o);
+        for (const o of State.ownedPets) await ensurePetState(o);
         renderCoins();
         if (State.view === 'care') renderStats();
       });
@@ -2584,7 +2615,7 @@
 
   /* Public namespace */
   global.SLIMEgachi = {
-    version: '1.6.0',
+    version: '1.7.0',
     mount(container, options) {
       if (!container) throw new Error('SLIMEgachi.mount: container is required');
       return createInstance(container, options || {});
