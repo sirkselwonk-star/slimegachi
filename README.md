@@ -23,9 +23,6 @@ slimegachi-pkg/         ← SOURCE-OF-TRUTH package (edit here)
   README.md             ←   widget integration contract (mount API, options, events)
   CHANGELOG.md
 Pet 1–4.svg / .png      ← canonical hand-drawn 2D pets (originals); _convert.py makes PNGs
-assets/                 ← throwaway .glb slime stand-ins (NOT the pets) + screenshots
-comfyui/                ← image-gen experiments
-files*.zip              ← delivery archives of the package
 ```
 
 **Two copies of the widget, on purpose:** `slimegachi-pkg/` is where you edit and version the game; `slimegachi/` is the built bundle the page loads. Don't hand-edit `slimegachi/` or `slimegachi-pkg/dist/` — they're generated.
@@ -64,11 +61,36 @@ Then **bump the cache buster** in `index.html` — increment `?v=N` on the chang
 
 ## The pets
 
-The four canonical pets are **hand-drawn 2D creatures** (`Pet 1–4.svg` at the repo root are the originals; `slimegachi-pkg/assets/pet-art/` holds the build's working copies). The `.glb` slimes in `assets/` are throwaway 3D stand-ins, not the pets.
+The four canonical pets are **hand-drawn 2D creatures** (`Pet 1–4.svg` at the repo root are the originals; `slimegachi-pkg/assets/pet-art/` holds the build's working copies).
 
 To add or unlock a pet, see [`slimegachi-pkg/docs/ADDING_A_PET.md`](slimegachi-pkg/docs/ADDING_A_PET.md).
 
 ---
+
+## Integrating into a site (for the dev wiring this up)
+
+The widget is deliberately **headless about wallet, auth, and storage** — it ships
+no wallet UI and no backend, exposing plug-in points instead so it drops into an
+existing tech stack. The four tie-in points, all documented in full in
+[`slimegachi-pkg/README.md`](slimegachi-pkg/README.md):
+
+- **Wallet / auth** — you own the connect flow; tell the widget the active account
+  via `game.setAccountId(accountId)` / `game.disconnect()`. No wallet code lives in
+  the game. (See *Wallet integration*.)
+- **NFT ownership** — default reads Hedera Mirror Node + IPFS; override with a
+  `getOwnedPets(accountId)` callback to use your own endpoint/cache. (See *Wallet
+  integration → Custom integration*.)
+- **Storage / database** — pet state defaults to `localStorage`; pass a `storage`
+  adapter (`load`/`save`/`remove`) to persist to your backend. For production,
+  key state by `{tokenId, serial}` (survives NFT trades + cross-device). A starter
+  SQL schema is in the contract. (See *Storage* and *Storage architecture*.)
+- **Events** — `onAchievement`, `onCareAction`, `onCoinsChanged`, etc. fire for
+  backend sync, server-side validation, NFT badge airdrops, and analytics. (See
+  *Events*.)
+
+`game.getState()` gives a read-only snapshot for debugging/sync. The *Known
+limitations* section lists exactly what's left to the integrator (HashPack/
+WalletConnect, backend adapter, badge claim flow, on-chain achievements).
 
 ## More docs
 
