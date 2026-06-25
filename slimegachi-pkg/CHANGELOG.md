@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.8.0 — care-screen layout pass
+
+Compact, restyled vitals and a tidier upper-left info column.
+
+- **Stat indicators → ring gauges**: the four stats render as small circular ring meters (conic-gradient fill, emoji icon in the centre, value beside each ring), replacing the stacked label + bar + value rows. Low stats (<25) still turn red. Driven from `renderStats()` via `--pct` / `--col` CSS variables.
+- **Vitals stacked upper-left**: the gauges sit as a vertical column on the left rather than a centred block.
+- **Pet name moved upper-left**: name + mood + level are left-aligned at the top of the stage (below the title, above the vitals), instead of centred mid-stage.
+- **Pet centred**: the pet image is vertically centred in the stage rather than anchored to the floor.
+- **Topbar tightened**: reduced top padding so the title sits higher.
+
+CSS-and-markup only — no changes to the mount API, options, events, or storage.
+
 ## 1.7.0 — storage keyed by {tokenId, serial}
 
 Pet state now follows the NFT, not the wallet — so a pet's care history survives trades and syncs across devices.

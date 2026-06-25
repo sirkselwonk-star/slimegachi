@@ -138,7 +138,7 @@ The `getState()` snapshot shape:
 }
 ```
 
-`SLIMEgachi.version` is a string on the namespace, useful for debugging compatibility (`'1.7.0'` at the time of writing).
+`SLIMEgachi.version` is a string on the namespace, useful for debugging compatibility (`'1.8.0'` at the time of writing).
 
 ---
 
@@ -443,7 +443,7 @@ Features:
 ## Versioning
 
 ```js
-SLIMEgachi.version  // → '1.7.0'
+SLIMEgachi.version  // → '1.8.0'
 ```
 
 The widget follows semver loosely: minor versions add features without breaking the public API; saved player data backfills missing fields with safe defaults across versions. See `CHANGELOG.md` for the full history.

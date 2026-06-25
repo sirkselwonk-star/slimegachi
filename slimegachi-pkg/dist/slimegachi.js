@@ -474,10 +474,10 @@
       '  <div class="slimegachi-speech" data-sg="speech"></div>',
       '  <div class="slimegachi-event-icon" data-sg="event-icon">!</div>',
       '  <div class="slimegachi-stats" data-sg="stats">',
-      '    <div class="slimegachi-stat"><div class="slimegachi-stat-lbl">Hunger</div><div class="slimegachi-stat-barwrap"><div class="slimegachi-stat-bar" data-sg="bar-hunger"></div></div><div class="slimegachi-stat-val" data-sg="val-hunger">100</div></div>',
-      '    <div class="slimegachi-stat"><div class="slimegachi-stat-lbl">Happy</div><div class="slimegachi-stat-barwrap"><div class="slimegachi-stat-bar" data-sg="bar-happy"></div></div><div class="slimegachi-stat-val" data-sg="val-happy">100</div></div>',
-      '    <div class="slimegachi-stat"><div class="slimegachi-stat-lbl">Energy</div><div class="slimegachi-stat-barwrap"><div class="slimegachi-stat-bar" data-sg="bar-energy"></div></div><div class="slimegachi-stat-val" data-sg="val-energy">100</div></div>',
-      '    <div class="slimegachi-stat"><div class="slimegachi-stat-lbl">Clean</div><div class="slimegachi-stat-barwrap"><div class="slimegachi-stat-bar" data-sg="bar-clean"></div></div><div class="slimegachi-stat-val" data-sg="val-clean">100</div></div>',
+      '    <div class="slimegachi-gauge"><div class="slimegachi-gauge-ring" data-sg="bar-hunger" title="Hunger"><span class="slimegachi-gauge-ico">🍖</span></div><div class="slimegachi-gauge-val" data-sg="val-hunger">100</div></div>',
+      '    <div class="slimegachi-gauge"><div class="slimegachi-gauge-ring" data-sg="bar-happy" title="Happy"><span class="slimegachi-gauge-ico">❤️</span></div><div class="slimegachi-gauge-val" data-sg="val-happy">100</div></div>',
+      '    <div class="slimegachi-gauge"><div class="slimegachi-gauge-ring" data-sg="bar-energy" title="Energy"><span class="slimegachi-gauge-ico">⚡</span></div><div class="slimegachi-gauge-val" data-sg="val-energy">100</div></div>',
+      '    <div class="slimegachi-gauge"><div class="slimegachi-gauge-ring" data-sg="bar-clean" title="Clean"><span class="slimegachi-gauge-ico">🧼</span></div><div class="slimegachi-gauge-val" data-sg="val-clean">100</div></div>',
       '  </div>',
       '  <div class="slimegachi-petheader" data-sg="petheader">',
       '    <div class="slimegachi-petname" data-sg="petname">—</div>',
@@ -1351,9 +1351,9 @@
       for (const stat of ['hunger', 'happy', 'energy', 'clean']) {
         const v = Math.round(p.stats[stat]);
         $('val-' + stat).textContent = v;
-        const bar = $('bar-' + stat);
-        bar.style.width = v + '%';
-        bar.style.background = v < 25 ? '#ff5577' : STAT_COLOR[stat];
+        const ring = $('bar-' + stat);
+        ring.style.setProperty('--pct', v);
+        ring.style.setProperty('--col', v < 25 ? '#ff5577' : STAT_COLOR[stat]);
       }
       $('petname').textContent = p.name;
       const sleeping = isPetSleeping(p.pet);
@@ -2615,7 +2615,7 @@
 
   /* Public namespace */
   global.SLIMEgachi = {
-    version: '1.7.0',
+    version: '1.8.0',
     mount(container, options) {
       if (!container) throw new Error('SLIMEgachi.mount: container is required');
       return createInstance(container, options || {});

@@ -66,7 +66,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px 8px;
+  padding: 8px 16px 6px;
   font-size: 13px;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -185,54 +185,57 @@
 /* Stats overlay (care screen) */
 .slimegachi-root .slimegachi-stats {
   position: absolute;
-  top: 48px;
+  top: 84px;
   left: 16px;
   right: 16px;
   z-index: 4;
   display: none;
   flex-direction: column;
-  gap: 6px;
+  align-items: flex-start;
+  gap: 8px;
 }
 .slimegachi-root .slimegachi-stats.slimegachi-show { display: flex; }
-.slimegachi-root .slimegachi-stat {
+.slimegachi-root .slimegachi-gauge {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+}
+/* Circular ring meter: a conic-gradient sweep clipped to a ring by a radial
+   gradient that paints an opaque inner disc (the donut hole) over it. The fill
+   percentage and colour are driven from renderStats() via --pct / --col. */
+.slimegachi-root .slimegachi-gauge-ring {
+  --pct: 100;
+  --col: #7fffd4;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background:
+    radial-gradient(closest-side, var(--slimegachi-bg_top) 68%, transparent 69% 100%),
+    conic-gradient(var(--col) calc(var(--pct) * 1%), rgba(255, 255, 255, 0.10) 0);
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
+  justify-content: center;
+  transition: background 0.4s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
-.slimegachi-root .slimegachi-stat-lbl {
-  width: 60px;
-  color: var(--slimegachi-muted);
+.slimegachi-root .slimegachi-gauge-ico {
+  font-size: 16px;
+  line-height: 1;
 }
-.slimegachi-root .slimegachi-stat-barwrap {
-  flex: 1;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 4px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-.slimegachi-root .slimegachi-stat-bar {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 0.4s ease, background 0.4s;
-}
-.slimegachi-root .slimegachi-stat-val {
-  width: 32px;
-  text-align: right;
+.slimegachi-root .slimegachi-gauge-val {
   font-family: monospace;
+  font-size: 11px;
   color: var(--slimegachi-text);
 }
 
 /* Pet name + mood */
 .slimegachi-root .slimegachi-petheader {
   position: absolute;
-  top: 124px;
-  left: 0;
-  right: 0;
-  text-align: center;
+  top: 16px;
+  left: 16px;
+  right: auto;
+  text-align: left;
   z-index: 3;
   display: none;
   pointer-events: none;
@@ -269,9 +272,9 @@
   position: absolute;
   inset: 0;
   display: none;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  padding-bottom: 100px;
+  padding-bottom: 0;
   z-index: 2;
   pointer-events: none;
 }
