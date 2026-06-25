@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>SLIMEgachi — Backend Storage</title>
+<style>
+html, body { height: 100%; margin: 0; background: #0a0612; font-family: system-ui; }
+body { display: flex; align-items: center; justify-content: center; }
+#slimegachi { width: 100%; height: 100%; max-width: 540px; max-height: 960px; }
+</style>
+<link rel="stylesheet" href="../dist/slimegachi.css">
+</head>
+<body>
+  <div id="slimegachi"></div>
+
+  <script src="../dist/slimegachi.js"></script>
+  <script>
+    /*
+     * Custom storage adapter pattern.
+     *
+     * Replaces the default localStorage with calls to your own backend.
+     * The contract: load → returns the saved blob or null; save → persists;
+     * remove → deletes. All async. The widget debounces writes (~800 ms)
+     * so don't worry about being hammered.
+     *
+     * Key shape: '{accountId}:v1' (or 'stub:v1' before wallet connects).
+     */
+
+    const apiBase = 'https://your-backend.example/api/slimegachi';
+
+    const backendStorage = {
+      async load(key) {
+        try {
+          const r = await fetch(apiBase + '/state/' + encodeURIComponent(key), {
+            headers: { 'Authorization': 'Bearer ' + getUserToken() }
+          });
+          if (!r.ok) return null;
+          return await r.json();
+        } catch (e) {
+          console.warn('Storage load failed, falling back to fresh state', e);
+          return null;
+        }
+      },
+
+      async save(key, data) {
+        try {
+          const r = await fetch(apiBase + '/state/' + encodeURIComponent(key), {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + getUserToken()
+            },
+            body: JSON.stringify(data)
+          });
+          return r.ok;
+        } catch (e) {
+          console.warn('Storage save failed', e);
+          return false;
+        }
+      },
+
+      async remove(key) {
+        try {
+          const r = await fetch(apiBase + '/state/' + encodeURIComponent(key), {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + getUserToken() }
+          });
+          return r.ok;
+        } catch (e) {
+          return false;
+        }
+      }
+    };
+
+    /* YOUR CODE: however you fetch the user's session token */
+    function getUserToken() { return 'demo-token'; }
+
+    const game = SLIMEgachi.mount(document.getElementById('slimegachi'), {
+      storage: backendStorage,
+      events: {
+        /* Even with backend storage, listen for events you care about for
+           server-side cross-validation (re-derive achievements server-side
+           instead of trusting client claims). */
+        onAchievement: (e) => {
+          fetch(apiBase + '/events/achievement', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + getUserToken()
+            },
+            body: JSON.stringify(e)
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

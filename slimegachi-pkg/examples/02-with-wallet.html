@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>SLIMEgachi — With Wallet</title>
+<style>
+html, body { height: 100%; margin: 0; background: #0a0612; font-family: system-ui; color: #f4ecd8; }
+body { display: flex; flex-direction: column; align-items: center; }
+header { padding: 16px; display: flex; gap: 12px; align-items: center; }
+header button { background: #00a1d4; border: none; color: #fff; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; }
+header .acct { font-family: monospace; font-size: 12px; color: #a98ed4; }
+#slimegachi { width: 100%; flex: 1; max-width: 540px; max-height: 900px; }
+</style>
+<link rel="stylesheet" href="../dist/slimegachi.css">
+</head>
+<body>
+  <header>
+    <button id="connect">Connect Wallet</button>
+    <span class="acct" id="account">— not connected —</span>
+  </header>
+  <div id="slimegachi"></div>
+
+  <script src="../dist/slimegachi.js"></script>
+  <script>
+    /*
+     * Wallet integration pattern.
+     *
+     * Replace the simulated `fakeWallet` block with HashConnect, WalletConnect,
+     * Magic, Blade, etc. The widget contract is: call game.setAccountId(id)
+     * when connected, game.disconnect() when disconnected. Everything else
+     * is yours.
+     */
+
+    const game = SLIMEgachi.mount(document.getElementById('slimegachi'), {
+      events: {
+        onAchievement: (e) => {
+          console.log('[achievement]', e);
+          if (e.mintable) {
+            // YOUR CODE: queue an HIP-904 airdrop for this account
+            // yourBackend.queueBadgeAirdrop(currentAccount, e.id);
+          }
+        },
+        onCoinsChanged: (e) => console.log('[coins]', e),
+        onCareAction: (e) => console.log('[care]', e),
+        onError: (e) => console.warn('[error]', e)
+      }
+    });
+
+    /* Replace this with your real wallet flow */
+    const fakeWallet = {
+      connected: false,
+      account: null,
+      async connect() {
+        // ... HashConnect / WalletConnect logic ...
+        this.account = prompt('Pretend wallet connect. Enter Hedera account ID (0.0.xxxx):', '0.0.12345');
+        this.connected = !!this.account;
+        return this.account;
+      },
+      disconnect() {
+        this.connected = false;
+        this.account = null;
+      }
+    };
+
+    document.getElementById('connect').addEventListener('click', async () => {
+      if (fakeWallet.connected) {
+        fakeWallet.disconnect();
+        document.getElementById('account').textContent = '— not connected —';
+        document.getElementById('connect').textContent = 'Connect Wallet';
+        await game.disconnect();
+      } else {
+        const id = await fakeWallet.connect();
+        if (id) {
+          document.getElementById('account').textContent = id;
+          document.getElementById('connect').textContent = 'Disconnect';
+          await game.setAccountId(id);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+# Non-game directories (kept local, not part of the deployable game)
+assets/
+comfyui/
+
+# Delivery archives
+files.zip
+files_2.zip
+
+# Local tooling / agent config
+.claude/
+
+# Python cruft
+__pycache__/
+*.pyc
+
+# OS cruft
+.DS_Store
+Thumbs.db

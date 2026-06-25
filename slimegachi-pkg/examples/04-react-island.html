@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>SLIMEgachi — React Island</title>
+<style>
+html, body { height: 100%; margin: 0; background: #0a0612; font-family: system-ui; }
+body { display: flex; align-items: center; justify-content: center; }
+#root { width: 100%; height: 100%; max-width: 540px; max-height: 960px; }
+</style>
+<link rel="stylesheet" href="../dist/slimegachi.css">
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- React (CDN for demo; in your build it'll be npm) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- The widget itself -->
+  <script src="../dist/slimegachi.js"></script>
+
+  <script type="text/babel">
+    /*
+     * React island pattern.
+     *
+     * SLIMEgachi is vanilla JS but plays nice with any framework as a
+     * "render island" — mount once into a ref, destroy on unmount.
+     * Same pattern works in Vue (mounted/unmounted), Svelte (onMount),
+     * Next.js (useEffect with 'use client'), etc.
+     *
+     * Important: pass STABLE callbacks (useCallback or refs) to options.events.
+     * The widget reads options once at mount; if your handlers change on every
+     * render, you'll capture stale state. Use refs to read fresh state.
+     */
+
+    const { useEffect, useRef, useState } = React;
+
+    function SlimeGachi({ accountId, onAchievement }) {
+      const containerRef = useRef(null);
+      const gameRef = useRef(null);
+      const onAchievementRef = useRef(onAchievement);
+
+      // Keep ref fresh without re-mounting
+      useEffect(() => { onAchievementRef.current = onAchievement; }, [onAchievement]);
+
+      // Mount once
+      useEffect(() => {
+        gameRef.current = SLIMEgachi.mount(containerRef.current, {
+          events: {
+            onAchievement: (e) => onAchievementRef.current && onAchievementRef.current(e)
+          }
+        });
+        return () => gameRef.current?.destroy();
+      }, []);
+
+      // Push account changes
+      useEffect(() => {
+        if (!gameRef.current) return;
+        if (accountId) gameRef.current.setAccountId(accountId);
+        else gameRef.current.disconnect();
+      }, [accountId]);
+
+      return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
+    }
+
+    function App() {
+      const [account, setAccount] = useState(null);
+      const [unlocked, setUnlocked] = useState([]);
+
+      return (
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: 8, color: '#f4ecd8', fontSize: 12 }}>
+            Account: {account || 'none'} · Unlocked: {unlocked.length}
+            <button
+              onClick={() => setAccount(account ? null : '0.0.12345')}
+              style={{ marginLeft: 12, background: '#00a1d4', color: '#fff', border: 0, padding: '4px 10px', borderRadius: 6 }}
+            >
+              {account ? 'Disconnect' : 'Fake connect'}
+            </button>
+          </div>
+          <div style={{ flex: 1 }}>
+            <SlimeGachi
+              accountId={account}
+              onAchievement={(e) => setUnlocked((u) => [...u, e.id])}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

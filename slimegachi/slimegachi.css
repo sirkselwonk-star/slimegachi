@@ -1,0 +1,1165 @@
+/* =====================================================================
+   SLIMEgachi — Widget styles (scoped)
+   All rules nested under .slimegachi-root to prevent host-page collisions.
+   Theme variables (--slimegachi-*) are overridable from outside.
+   ===================================================================== */
+
+.slimegachi-root {
+  /* Theme variables — override these from your host page to recolor */
+  --slimegachi-bg-top: #2a1f3f;
+  --slimegachi-bg-bot: #1a1428;
+  --slimegachi-accent: #00a1d4;
+  --slimegachi-coin: #fed600;
+  --slimegachi-text: #f4ecd8;
+  --slimegachi-muted: #a98ed4;
+  --slimegachi-dim: #6a5882;
+  --slimegachi-danger: #ff5577;
+  --slimegachi-success: #7fffd4;
+  --slimegachi-favorite: #ffb3d9;
+
+  /* Layout */
+  --slimegachi-max-width: 540px;
+  --slimegachi-max-height: 960px;
+
+  /* Reset only within widget — don't touch host styles */
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: var(--slimegachi-max-width);
+  max-height: var(--slimegachi-max-height);
+  margin: 0 auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(ellipse at top, var(--slimegachi-bg-top, #2a1f3f) 0%, var(--slimegachi-bg-bot, #1a1428) 70%);
+  color: var(--slimegachi-text);
+  font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: background 1.6s ease;
+  box-sizing: border-box;
+}
+
+.slimegachi-root *,
+.slimegachi-root *::before,
+.slimegachi-root *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Background canvas — non-interactive */
+.slimegachi-root .slimegachi-bg-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+/* Top bar */
+.slimegachi-root .slimegachi-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 8px;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--slimegachi-muted);
+  position: relative;
+  z-index: 5;
+  gap: 8px;
+}
+.slimegachi-root .slimegachi-brand {
+  font-weight: 700;
+  color: var(--slimegachi-text);
+  flex: 0 0 auto;
+}
+.slimegachi-root .slimegachi-brand-accent {
+  color: var(--slimegachi-accent);
+}
+.slimegachi-root .slimegachi-coins {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(254, 214, 0, 0.12);
+  border: 1px solid rgba(254, 214, 0, 0.4);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--slimegachi-coin);
+  letter-spacing: 0.5px;
+  flex: 0 0 auto;
+  font-family: monospace;
+}
+.slimegachi-root .slimegachi-coins-ico { font-size: 14px; }
+.slimegachi-root .slimegachi-sound-btn {
+  flex: none;
+  margin-left: 8px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: var(--slimegachi-text);
+  padding: 0;
+  transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.slimegachi-root .slimegachi-sound-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--slimegachi-accent);
+}
+.slimegachi-root .slimegachi-sound-btn.slimegachi-muted { opacity: 0.5; }
+.slimegachi-root .slimegachi-music-btn { font-size: 13px; margin-left: 6px; }
+.slimegachi-root .slimegachi-acct {
+  font-size: 10px;
+  color: var(--slimegachi-dim);
+  font-family: monospace;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Stage (main play area) */
+.slimegachi-root .slimegachi-stage {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Bottom bar */
+.slimegachi-root .slimegachi-bottombar {
+  padding: 10px 12px 18px;
+  display: none;
+  gap: 8px;
+  position: relative;
+  z-index: 5;
+  background: linear-gradient(to top, rgba(26, 20, 40, 0.95) 60%, transparent);
+}
+.slimegachi-root .slimegachi-bottombar.slimegachi-show { display: flex; }
+.slimegachi-root .slimegachi-actbtn {
+  flex: 1;
+  background: rgba(0, 161, 212, 0.10);
+  border: 1.5px solid rgba(0, 161, 212, 0.45);
+  color: var(--slimegachi-text);
+  padding: 14px 4px;
+  border-radius: 14px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  font-family: inherit;
+}
+.slimegachi-root .slimegachi-actbtn:active {
+  transform: scale(0.94);
+  background: rgba(0, 161, 212, 0.22);
+}
+.slimegachi-root .slimegachi-actbtn-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* Stats overlay (care screen) */
+.slimegachi-root .slimegachi-stats {
+  position: absolute;
+  top: 48px;
+  left: 16px;
+  right: 16px;
+  z-index: 4;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+}
+.slimegachi-root .slimegachi-stats.slimegachi-show { display: flex; }
+.slimegachi-root .slimegachi-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+.slimegachi-root .slimegachi-stat-lbl {
+  width: 60px;
+  color: var(--slimegachi-muted);
+}
+.slimegachi-root .slimegachi-stat-barwrap {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.slimegachi-root .slimegachi-stat-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease, background 0.4s;
+}
+.slimegachi-root .slimegachi-stat-val {
+  width: 32px;
+  text-align: right;
+  font-family: monospace;
+  color: var(--slimegachi-text);
+}
+
+/* Pet name + mood */
+.slimegachi-root .slimegachi-petheader {
+  position: absolute;
+  top: 124px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 3;
+  display: none;
+  pointer-events: none;
+}
+.slimegachi-root .slimegachi-petheader.slimegachi-show { display: block; }
+.slimegachi-root .slimegachi-petname {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--slimegachi-text);
+  letter-spacing: 1px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+}
+.slimegachi-root .slimegachi-petmood {
+  font-size: 11px;
+  color: var(--slimegachi-accent);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 4px;
+  opacity: 0.9;
+}
+.slimegachi-root .slimegachi-petlevel {
+  font-size: 10px;
+  color: var(--slimegachi-coin);
+  letter-spacing: 1px;
+  margin-top: 4px;
+  font-family: monospace;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  opacity: 0.85;
+}
+.slimegachi-root .slimegachi-petlevel:empty { display: none; }
+
+/* Pet image in care screen */
+.slimegachi-root .slimegachi-carestage {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 100px;
+  z-index: 2;
+  pointer-events: none;
+}
+.slimegachi-root .slimegachi-carestage.slimegachi-show { display: flex; }
+.slimegachi-root .slimegachi-petimg {
+  width: 65%;
+  max-width: 340px;
+  height: auto;
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.5));
+  transform-origin: 50% 100%;
+  transition: filter 0.6s ease;
+}
+.slimegachi-root .slimegachi-petimg.slimegachi-sleeping {
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.5)) brightness(0.65) saturate(0.5);
+}
+.slimegachi-root .slimegachi-petimg.slimegachi-sad {
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.5)) saturate(0.5) brightness(0.85);
+}
+.slimegachi-root .slimegachi-petimg.slimegachi-happy {
+  filter: drop-shadow(0 14px 28px rgba(0, 161, 212, 0.35));
+}
+.slimegachi-root .slimegachi-petimg.slimegachi-sick {
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.5)) hue-rotate(50deg) saturate(0.7);
+}
+.slimegachi-root .slimegachi-petimg.slimegachi-anim {
+  transform: translateY(var(--slimegachi-bounce, 0px))
+             scaleY(var(--slimegachi-squish, 1))
+             scaleX(calc(2 - var(--slimegachi-squish, 1)))
+             rotate(var(--slimegachi-wobble, 0deg));
+}
+
+/* Speech bubble */
+.slimegachi-root .slimegachi-speech {
+  position: absolute;
+  z-index: 4;
+  background: #fff;
+  color: #1a1428;
+  border: 2px solid #1a1428;
+  border-radius: 14px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  max-width: 60%;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  display: none;
+}
+.slimegachi-root .slimegachi-speech.slimegachi-show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.slimegachi-root .slimegachi-speech::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 10px solid #1a1428;
+}
+.slimegachi-root .slimegachi-speech::before {
+  content: '';
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid #fff;
+  z-index: 1;
+}
+
+/* Random event icon */
+.slimegachi-root .slimegachi-event-icon {
+  position: absolute;
+  z-index: 5;
+  width: 48px;
+  height: 48px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  background: var(--slimegachi-coin);
+  border: 2px solid #1a1428;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  animation: slimegachi-eventbob 1.6s ease-in-out infinite;
+}
+.slimegachi-root .slimegachi-event-icon.slimegachi-show { display: flex; }
+@keyframes slimegachi-eventbob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+/* Shelf */
+.slimegachi-root .slimegachi-shelf {
+  position: absolute;
+  inset: 0;
+  padding: 60px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  z-index: 3;
+}
+.slimegachi-root .slimegachi-shelf.slimegachi-hide { display: none; }
+.slimegachi-root .slimegachi-shelf-title {
+  text-align: center;
+  font-size: 14px;
+  color: var(--slimegachi-muted);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+.slimegachi-root .slimegachi-shelf-sub {
+  text-align: center;
+  font-size: 10px;
+  color: var(--slimegachi-dim);
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+.slimegachi-root .slimegachi-status {
+  display: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: center;
+  border: 1px solid;
+}
+.slimegachi-root .slimegachi-status.slimegachi-show { display: block; }
+.slimegachi-root .slimegachi-status.slimegachi-info {
+  background: rgba(0, 161, 212, 0.10);
+  border-color: rgba(0, 161, 212, 0.4);
+  color: #a7d8ee;
+}
+.slimegachi-root .slimegachi-status.slimegachi-error {
+  background: rgba(255, 87, 119, 0.12);
+  border-color: rgba(255, 87, 119, 0.4);
+  color: #ffb3c1;
+}
+.slimegachi-root .slimegachi-shelf-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-content: center;
+}
+
+/* Slots */
+.slimegachi-root .slimegachi-slot {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.10);
+  border-radius: 18px;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s;
+  overflow: hidden;
+}
+.slimegachi-root .slimegachi-slot:active { transform: scale(0.96); }
+.slimegachi-root .slimegachi-slot.slimegachi-owned {
+  border-color: rgba(0, 161, 212, 0.5);
+  background: rgba(0, 161, 212, 0.06);
+}
+.slimegachi-root .slimegachi-slot.slimegachi-locked { cursor: default; }
+.slimegachi-root .slimegachi-slot-art {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 78%;
+  height: auto;
+  pointer-events: none;
+  transition: transform 0.5s ease;
+}
+.slimegachi-root .slimegachi-slot.slimegachi-locked .slimegachi-slot-art {
+  filter: brightness(0) opacity(0.18);
+}
+.slimegachi-root .slimegachi-slot.slimegachi-unowned .slimegachi-slot-art {
+  filter: grayscale(1) brightness(0.45) opacity(0.6);
+}
+.slimegachi-root .slimegachi-slot-label {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--slimegachi-text);
+  font-weight: 700;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+  z-index: 2;
+}
+.slimegachi-root .slimegachi-slot-sublabel {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--slimegachi-dim);
+  z-index: 2;
+}
+.slimegachi-root .slimegachi-slot.slimegachi-locked .slimegachi-slot-label {
+  color: var(--slimegachi-dim);
+}
+.slimegachi-root .slimegachi-slot-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 161, 212, 0.18);
+  border: 1px solid rgba(0, 161, 212, 0.5);
+  color: var(--slimegachi-accent);
+  font-size: 8px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  z-index: 2;
+  font-weight: 700;
+}
+.slimegachi-root .slimegachi-slot.slimegachi-locked .slimegachi-slot-badge,
+.slimegachi-root .slimegachi-slot.slimegachi-unowned .slimegachi-slot-badge {
+  background: rgba(106, 88, 130, 0.2);
+  border-color: rgba(106, 88, 130, 0.4);
+  color: var(--slimegachi-muted);
+}
+
+/* Shelf actions */
+.slimegachi-root .slimegachi-shelf-actions {
+  display: flex;
+  gap: 6px;
+  padding: 0 4px;
+}
+.slimegachi-root .slimegachi-shelf-btn {
+  flex: 1;
+  min-width: 0;
+  background: rgba(0, 161, 212, 0.10);
+  border: 1.5px solid rgba(0, 161, 212, 0.4);
+  color: var(--slimegachi-text);
+  padding: 10px 4px;
+  border-radius: 12px;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-family: inherit;
+}
+.slimegachi-root .slimegachi-shelf-btn:active { transform: scale(0.96); }
+.slimegachi-root .slimegachi-shelf-btn-ico { font-size: 13px; }
+
+/* Back button */
+.slimegachi-root .slimegachi-back {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 6;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: var(--slimegachi-text);
+  font-size: 18px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.slimegachi-root .slimegachi-back.slimegachi-show { display: flex; }
+.slimegachi-root .slimegachi-back:active { transform: scale(0.92); }
+
+/* Action feedback floaters */
+.slimegachi-root .slimegachi-feedback {
+  position: absolute;
+  font-size: 20px;
+  font-weight: 700;
+  pointer-events: none;
+  z-index: 7;
+  animation: slimegachi-floatup 1.2s ease-out forwards;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+@keyframes slimegachi-floatup {
+  0%   { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
+  20%  { opacity: 1; transform: translate(-50%, -10px) scale(1.1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(0.9); }
+}
+
+/* Emote bubble floaters — emojis that drift up from the pet's head */
+.slimegachi-root .slimegachi-emote {
+  position: absolute;
+  font-size: 24px;
+  pointer-events: none;
+  z-index: 6;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  animation: slimegachi-emote-rise 1.6s ease-out forwards;
+}
+@keyframes slimegachi-emote-rise {
+  0%   { opacity: 0; transform: translate(-50%, 8px) scale(0.4) rotate(-12deg); }
+  18%  { opacity: 1; transform: translate(-50%, -8px) scale(1.15) rotate(8deg); }
+  60%  { opacity: 1; transform: translate(-50%, -42px) scale(1.0) rotate(-4deg); }
+  100% { opacity: 0; transform: translate(-50%, -78px) scale(0.85) rotate(2deg); }
+}
+
+
+/* Achievement notification */
+.slimegachi-root .slimegachi-ach-notif {
+  position: absolute;
+  top: 60px;
+  right: 12px;
+  transform: translateY(-120%);
+  background: linear-gradient(135deg, var(--slimegachi-coin), #f28c38);
+  color: #1a1428;
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-weight: 700;
+  z-index: 30;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  transition: transform 0.5s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 90%;
+  border: 2px solid #1a1428;
+}
+.slimegachi-root .slimegachi-ach-notif.slimegachi-show {
+  transform: translateY(0);
+}
+.slimegachi-root .slimegachi-ach-notif-ico { font-size: 24px; }
+.slimegachi-root .slimegachi-ach-notif-body {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.slimegachi-root .slimegachi-ach-notif-title {
+  font-size: 10px;
+  opacity: 0.7;
+  letter-spacing: 1.5px;
+}
+.slimegachi-root .slimegachi-ach-notif-name {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+/* Dev panel — bottom-right, lifted above the action bar so it never sits on
+   top of game controls. Yellow tint + "DEV" prefix to visually flag it as
+   debug-only and avoid being mistaken for game UI. */
+.slimegachi-root .slimegachi-dev {
+  position: absolute;
+  bottom: 86px;
+  right: 6px;
+  z-index: 10;
+  font-size: 9px;
+  color: #ffd966;
+  background: rgba(254, 214, 0, 0.12);
+  border: 1px solid rgba(254, 214, 0, 0.35);
+  padding: 3px 6px;
+  border-radius: 6px;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  opacity: 0.55;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  pointer-events: auto;
+}
+.slimegachi-root .slimegachi-dev::before {
+  content: 'DEV';
+  font-size: 8px;
+  opacity: 0.8;
+  padding-right: 2px;
+}
+.slimegachi-root .slimegachi-dev:hover { opacity: 1; }
+.slimegachi-root .slimegachi-dev.slimegachi-hidden { display: none; }
+.slimegachi-root .slimegachi-dev button {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--slimegachi-muted);
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Modal */
+.slimegachi-root .slimegachi-modal {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 20;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.slimegachi-root .slimegachi-modal.slimegachi-show { display: flex; }
+.slimegachi-root .slimegachi-modal-panel {
+  background: #2a1f3f;
+  border: 1.5px solid rgba(0, 161, 212, 0.4);
+  border-radius: 18px;
+  padding: 20px;
+  max-width: 420px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.slimegachi-root .slimegachi-modal h2 {
+  font-size: 15px;
+  color: var(--slimegachi-text);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  text-align: center;
+}
+.slimegachi-root .slimegachi-modal p {
+  font-size: 13px;
+  color: var(--slimegachi-muted);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+.slimegachi-root .slimegachi-modal input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--slimegachi-text);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: monospace;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.slimegachi-root .slimegachi-modal-btn {
+  background: rgba(0, 161, 212, 0.22);
+  border: 1.5px solid rgba(0, 161, 212, 0.6);
+  color: var(--slimegachi-text);
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin: 4px;
+  font-family: inherit;
+}
+.slimegachi-root .slimegachi-modal-btn:active { transform: scale(0.96); }
+.slimegachi-root .slimegachi-modal-btn.slimegachi-alt {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.slimegachi-root .slimegachi-modal-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+/* Shop / Feed grid */
+.slimegachi-root .slimegachi-shop-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 10px 0;
+}
+.slimegachi-root .slimegachi-shop-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+.slimegachi-root .slimegachi-shop-item:active { transform: scale(0.96); }
+.slimegachi-root .slimegachi-shop-item.slimegachi-fav {
+  border-color: rgba(255, 179, 217, 0.5);
+  background: rgba(255, 179, 217, 0.06);
+}
+.slimegachi-root .slimegachi-shop-item-ico {
+  font-size: 32px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.slimegachi-root .slimegachi-shop-item-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--slimegachi-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.slimegachi-root .slimegachi-shop-item-desc {
+  font-size: 9px;
+  color: var(--slimegachi-muted);
+  margin-top: 3px;
+  min-height: 24px;
+}
+.slimegachi-root .slimegachi-shop-item-price {
+  font-size: 11px;
+  color: var(--slimegachi-coin);
+  font-weight: 700;
+  margin-top: 6px;
+  font-family: monospace;
+}
+.slimegachi-root .slimegachi-shop-item-price.slimegachi-free {
+  color: var(--slimegachi-success);
+}
+.slimegachi-root .slimegachi-shop-item.slimegachi-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.slimegachi-root .slimegachi-shop-fav-tag {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 10px;
+}
+
+/* Achievement rows */
+.slimegachi-root .slimegachi-ach-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0;
+}
+.slimegachi-root .slimegachi-ach-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+.slimegachi-root .slimegachi-ach-row.slimegachi-unlocked {
+  border-color: rgba(254, 214, 0, 0.4);
+  background: rgba(254, 214, 0, 0.06);
+}
+.slimegachi-root .slimegachi-ach-row-ico {
+  font-size: 24px;
+  width: 32px;
+  text-align: center;
+  filter: grayscale(1) opacity(0.4);
+}
+.slimegachi-root .slimegachi-ach-row.slimegachi-unlocked .slimegachi-ach-row-ico {
+  filter: none;
+}
+.slimegachi-root .slimegachi-ach-row-info {
+  flex: 1;
+  min-width: 0;
+}
+.slimegachi-root .slimegachi-ach-row-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--slimegachi-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.slimegachi-root .slimegachi-ach-row.slimegachi-unlocked .slimegachi-ach-row-name {
+  color: var(--slimegachi-coin);
+}
+.slimegachi-root .slimegachi-ach-row-desc {
+  font-size: 10px;
+  color: var(--slimegachi-muted);
+  margin-top: 2px;
+}
+.slimegachi-root .slimegachi-ach-row-claim {
+  background: rgba(0, 161, 212, 0.2);
+  border: 1px solid rgba(0, 161, 212, 0.5);
+  color: var(--slimegachi-text);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: not-allowed;
+  opacity: 0.6;
+  font-weight: 700;
+  font-family: inherit;
+}
+.slimegachi-root .slimegachi-ach-row-mint-badge {
+  background: rgba(127, 255, 212, 0.15);
+  color: var(--slimegachi-success);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-left: 6px;
+}
+
+/* Quest list */
+.slimegachi-root .slimegachi-quest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0;
+}
+.slimegachi-root .slimegachi-quest-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+.slimegachi-root .slimegachi-quest-row.slimegachi-ready {
+  border-color: rgba(254, 214, 0, 0.5);
+  background: rgba(254, 214, 0, 0.08);
+}
+.slimegachi-root .slimegachi-quest-row.slimegachi-claimed {
+  opacity: 0.55;
+  border-color: rgba(127, 255, 212, 0.25);
+}
+.slimegachi-root .slimegachi-quest-info {
+  flex: 1;
+  min-width: 0;
+}
+.slimegachi-root .slimegachi-quest-label {
+  font-size: 11px;
+  color: var(--slimegachi-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.slimegachi-root .slimegachi-quest-barwrap {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 3px;
+}
+.slimegachi-root .slimegachi-quest-bar {
+  height: 100%;
+  background: linear-gradient(to right, var(--slimegachi-accent), var(--slimegachi-coin));
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.slimegachi-root .slimegachi-quest-progress {
+  font-size: 9px;
+  color: var(--slimegachi-muted);
+  font-family: monospace;
+}
+.slimegachi-root .slimegachi-quest-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+.slimegachi-root .slimegachi-quest-reward {
+  font-size: 11px;
+  color: var(--slimegachi-coin);
+  font-weight: 700;
+  font-family: monospace;
+}
+.slimegachi-root .slimegachi-quest-claim {
+  background: rgba(254, 214, 0, 0.22);
+  border: 1.5px solid rgba(254, 214, 0, 0.6);
+  color: var(--slimegachi-coin);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.slimegachi-root .slimegachi-quest-claim:active { transform: scale(0.94); }
+.slimegachi-root .slimegachi-quest-status {
+  font-size: 9px;
+  color: var(--slimegachi-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Quest notification dot on shelf button */
+.slimegachi-root .slimegachi-shelf-btn { position: relative; }
+.slimegachi-root .slimegachi-shelf-btn-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background: var(--slimegachi-coin);
+  border-radius: 50%;
+  display: none;
+  box-shadow: 0 0 6px rgba(254, 214, 0, 0.7);
+  animation: slimegachi-dot-pulse 1.6s ease-in-out infinite;
+}
+.slimegachi-root .slimegachi-shelf-btn-dot.slimegachi-show { display: block; }
+@keyframes slimegachi-dot-pulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50%      { opacity: 1; transform: scale(1.2); }
+}
+
+/* Collection rows */
+.slimegachi-root .slimegachi-collection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0;
+}
+.slimegachi-root .slimegachi-collection-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+}
+.slimegachi-root .slimegachi-collection-ico {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+.slimegachi-root .slimegachi-collection-label {
+  flex: 1;
+  font-size: 11px;
+  color: var(--slimegachi-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.slimegachi-root .slimegachi-collection-value {
+  font-size: 13px;
+  color: var(--slimegachi-text);
+  font-weight: 700;
+  font-family: monospace;
+}
+
+/* Floor in care screen */
+.slimegachi-root .slimegachi-floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 90px;
+  height: 120px;
+  z-index: 1;
+  pointer-events: none;
+  display: none;
+}
+.slimegachi-root .slimegachi-floor.slimegachi-show { display: block; }
+.slimegachi-root .slimegachi-floor::before {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 30px;
+  height: 30px;
+  background: radial-gradient(ellipse at center, rgba(0, 161, 212, 0.18) 0%, transparent 70%);
+  filter: blur(8px);
+}
+.slimegachi-root .slimegachi-floor::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 42px;
+  height: 1px;
+  background: linear-gradient(to right, transparent 0%, rgba(0, 161, 212, 0.3) 50%, transparent 100%);
+}
+
+/* Mini-game overlay */
+.slimegachi-root .slimegachi-minigame {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  display: none;
+  flex-direction: column;
+  background: rgba(26, 20, 40, 0.96);
+}
+.slimegachi-root .slimegachi-minigame.slimegachi-show { display: flex; }
+.slimegachi-root .slimegachi-minigame-header {
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.slimegachi-root .slimegachi-minigame-title {
+  font-size: 13px;
+  color: var(--slimegachi-text);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+.slimegachi-root .slimegachi-minigame-score {
+  font-size: 18px;
+  color: var(--slimegachi-coin);
+  font-weight: 700;
+  font-family: monospace;
+}
+.slimegachi-root .slimegachi-minigame-timer {
+  font-size: 14px;
+  color: var(--slimegachi-accent);
+  font-weight: 700;
+  font-family: monospace;
+}
+.slimegachi-root .slimegachi-minigame-stage {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+}
+.slimegachi-root .slimegachi-minigame-stage canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.slimegachi-root .slimegachi-minigame-exit {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--slimegachi-text);
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: inherit;
+}
+.slimegachi-root .slimegachi-miniresult {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(26, 20, 40, 0.95);
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+}
+.slimegachi-root .slimegachi-miniresult.slimegachi-show { display: flex; }
+.slimegachi-root .slimegachi-miniresult h3 {
+  color: var(--slimegachi-coin);
+  font-size: 20px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+.slimegachi-root .slimegachi-miniresult-big {
+  font-size: 48px;
+  color: var(--slimegachi-text);
+  font-weight: 800;
+  font-family: monospace;
+}
+.slimegachi-root .slimegachi-miniresult-stats {
+  display: flex;
+  gap: 20px;
+  color: var(--slimegachi-muted);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.slimegachi-root .slimegachi-miniresult-stats strong {
+  color: var(--slimegachi-success);
+  font-family: monospace;
+}

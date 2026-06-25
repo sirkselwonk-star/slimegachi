@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>SLIMEgachi — Minimal Integration</title>
+<style>
+html, body { height: 100%; margin: 0; background: #0a0612; font-family: system-ui; }
+body { display: flex; align-items: center; justify-content: center; }
+#slimegachi { width: 100%; height: 100%; max-width: 540px; max-height: 960px; }
+</style>
+<link rel="stylesheet" href="../dist/slimegachi.css">
+</head>
+<body>
+  <div id="slimegachi"></div>
+
+  <script src="../dist/slimegachi.js"></script>
+  <script>
+    /*
+     * Minimal integration. Stub mode, no wallet, no event hooks.
+     * Plays out of the box with Kitten + Monkey as test pets.
+     */
+    const game = SLIMEgachi.mount(document.getElementById('slimegachi'));
+  </script>
+</body>
+</html>
