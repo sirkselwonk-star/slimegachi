@@ -485,10 +485,12 @@
       '    <div class="slimegachi-status" data-sg="status"></div>',
       '    <div class="slimegachi-shelf-grid" data-sg="shelf-grid"></div>',
       '    <div class="slimegachi-shelf-actions">',
-      '      <button class="slimegachi-shelf-btn" data-sg="open-quests"><span class="slimegachi-shelf-btn-ico">📜</span>Quests<span class="slimegachi-shelf-btn-dot" data-sg="quests-dot"></span></button>',
-      '      <button class="slimegachi-shelf-btn" data-sg="open-shop"><span class="slimegachi-shelf-btn-ico">🛒</span>Shop</button>',
-      '      <button class="slimegachi-shelf-btn" data-sg="open-achievements"><span class="slimegachi-shelf-btn-ico">🏆</span>Badges</button>',
-      '      <button class="slimegachi-shelf-btn" data-sg="open-collection"><span class="slimegachi-shelf-btn-ico">📊</span>Stats</button>',
+      '      <div class="slimegachi-shelf-actions-inner">',
+      '        <button class="slimegachi-shelf-btn" data-sg="open-quests"><span class="slimegachi-shelf-btn-ico">📜</span>Quests<span class="slimegachi-shelf-btn-dot" data-sg="quests-dot"></span></button>',
+      '        <button class="slimegachi-shelf-btn" data-sg="open-shop"><span class="slimegachi-shelf-btn-ico">🛒</span>Shop</button>',
+      '        <button class="slimegachi-shelf-btn" data-sg="open-achievements"><span class="slimegachi-shelf-btn-ico">🏆</span>Badges</button>',
+      '        <button class="slimegachi-shelf-btn" data-sg="open-collection"><span class="slimegachi-shelf-btn-ico">📊</span>Stats</button>',
+      '      </div>',
       '    </div>',
       '  </div>',
       '  <div class="slimegachi-minigame" data-sg="minigame">',
@@ -910,6 +912,17 @@
       }
       container.style.setProperty('--slimegachi-bg-top', top);
       container.style.setProperty('--slimegachi-bg-bot', bot);
+      /* Adaptive HUD ink: the care name/mood/vitals are light-on-dark by default,
+         but bright daytime skies (Kitten/Monkey) wash them out. Flip the HUD to
+         dark-on-light when the sky is light. Weight the top colour higher since
+         the HUD hugs the top edge. */
+      const skyLuma = relLuma(top) * 0.6 + relLuma(bot) * 0.4;
+      container.classList.toggle('slimegachi-lightsky', skyLuma > 0.6);
+    }
+    /* Perceived luminance (0–1) of a #rrggbb colour. */
+    function relLuma(hex) {
+      const c = hexToRgb(hex);
+      return (0.299 * c.r + 0.587 * c.g + 0.114 * c.b) / 255;
     }
 
     /* ----- Pet state helpers ----- */

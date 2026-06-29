@@ -11,11 +11,30 @@
   --slimegachi-accent: #00a1d4;
   --slimegachi-coin: #fed600;
   --slimegachi-text: #f4ecd8;
-  --slimegachi-muted: #a98ed4;
+  --slimegachi-muted: #f4ecd8;        /* secondary text — off-white, matches --text (was light purple #a98ed4) */
+  --slimegachi-locked: #a98ed4;       /* light purple, kept for locked pet-card text */
   --slimegachi-dim: #6a5882;
   --slimegachi-danger: #ff5577;
   --slimegachi-success: #7fffd4;
   --slimegachi-favorite: #ffb3d9;
+
+  /* Type system. Display = White Rabbit (the LCD-ish brand face) for the wordmark
+     and numeric readouts; UI = JetBrains Mono as the workhorse for labels, buttons
+     and body copy. Both fall back through JetBrains Mono to the platform monospace,
+     so the widget degrades cleanly if the host page hasn't loaded the webfonts.
+     (Major Mono Display was loaded but never referenced — dropped from index.html.) */
+  --slimegachi-font-display: 'White Rabbit', 'JetBrains Mono', ui-monospace, monospace;
+  --slimegachi-font-ui: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Care-screen HUD ink — defaults to light-on-dark (the normal dark/dusk/night
+     sky). Flipped to dark-on-light by .slimegachi-lightsky when the active pet's
+     sky is bright (e.g. Kitten/Monkey daytime), which JS toggles in applyTimeTint. */
+  --slimegachi-hud-text: var(--slimegachi-text);
+  --slimegachi-hud-accent: var(--slimegachi-accent);
+  --slimegachi-hud-level: var(--slimegachi-coin);
+  --slimegachi-hud-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+  --slimegachi-hud-shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.6);
+  --slimegachi-ring-track: rgba(255, 255, 255, 0.10);
 
   /* Layout */
   --slimegachi-max-width: 540px;
@@ -33,7 +52,7 @@
   flex-direction: column;
   background: radial-gradient(ellipse at top, var(--slimegachi-bg-top, #2a1f3f) 0%, var(--slimegachi-bg-bot, #1a1428) 70%);
   color: var(--slimegachi-text);
-  font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-family: var(--slimegachi-font-ui);
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
@@ -76,8 +95,10 @@
   gap: 8px;
 }
 .slimegachi-root .slimegachi-brand {
+  font-family: var(--slimegachi-font-display);
   font-weight: 700;
   color: var(--slimegachi-text);
+  letter-spacing: 2px;
   flex: 0 0 auto;
 }
 .slimegachi-root .slimegachi-brand-accent {
@@ -96,7 +117,7 @@
   color: var(--slimegachi-coin);
   letter-spacing: 0.5px;
   flex: 0 0 auto;
-  font-family: monospace;
+  font-family: var(--slimegachi-font-display);
 }
 .slimegachi-root .slimegachi-coins-ico { font-size: 14px; }
 .slimegachi-root .slimegachi-sound-btn {
@@ -127,7 +148,7 @@
 .slimegachi-root .slimegachi-acct {
   font-size: 10px;
   color: var(--slimegachi-dim);
-  font-family: monospace;
+  font-family: var(--slimegachi-font-ui);
   text-align: right;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -212,7 +233,7 @@
   border-radius: 50%;
   background:
     radial-gradient(closest-side, var(--slimegachi-bg_top) 68%, transparent 69% 100%),
-    conic-gradient(var(--col) calc(var(--pct) * 1%), rgba(255, 255, 255, 0.10) 0);
+    conic-gradient(var(--col) calc(var(--pct) * 1%), var(--slimegachi-ring-track) 0);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -224,9 +245,22 @@
   line-height: 1;
 }
 .slimegachi-root .slimegachi-gauge-val {
-  font-family: monospace;
-  font-size: 11px;
-  color: var(--slimegachi-text);
+  font-family: var(--slimegachi-font-display);
+  font-size: 12px;
+  color: var(--slimegachi-hud-text);
+  text-shadow: var(--slimegachi-hud-shadow-sm);
+}
+
+/* Bright-sky HUD ink: dark text + a soft light halo so the name/mood/level and
+   vitals stay legible over a light daytime sky. Accent/level darkened from the
+   neon HUD colours, which only read on dark. */
+.slimegachi-root.slimegachi-lightsky {
+  --slimegachi-hud-text: #1a1428;
+  --slimegachi-hud-accent: #0a6b48;
+  --slimegachi-hud-level: #6b4a00;
+  --slimegachi-hud-shadow: 0 1px 6px rgba(255, 255, 255, 0.6);
+  --slimegachi-hud-shadow-sm: 0 1px 3px rgba(255, 255, 255, 0.6);
+  --slimegachi-ring-track: rgba(0, 0, 0, 0.16);
 }
 
 /* Pet name + mood */
@@ -242,27 +276,29 @@
 }
 .slimegachi-root .slimegachi-petheader.slimegachi-show { display: block; }
 .slimegachi-root .slimegachi-petname {
+  font-family: var(--slimegachi-font-display);
   font-size: 22px;
   font-weight: 700;
-  color: var(--slimegachi-text);
+  color: var(--slimegachi-hud-text);
   letter-spacing: 1px;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+  text-shadow: var(--slimegachi-hud-shadow);
 }
 .slimegachi-root .slimegachi-petmood {
   font-size: 11px;
-  color: var(--slimegachi-accent);
+  color: var(--slimegachi-hud-accent);
   text-transform: uppercase;
   letter-spacing: 2px;
   margin-top: 4px;
+  text-shadow: var(--slimegachi-hud-shadow-sm);
   opacity: 0.9;
 }
 .slimegachi-root .slimegachi-petlevel {
   font-size: 10px;
-  color: var(--slimegachi-coin);
+  color: var(--slimegachi-hud-level);
   letter-spacing: 1px;
   margin-top: 4px;
-  font-family: monospace;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  font-family: var(--slimegachi-font-display);
+  text-shadow: var(--slimegachi-hud-shadow-sm);
   opacity: 0.85;
 }
 .slimegachi-root .slimegachi-petlevel:empty { display: none; }
@@ -423,10 +459,17 @@
 }
 .slimegachi-root .slimegachi-shelf-grid {
   flex: 1;
+  min-height: 0;            /* let flex:1 actually constrain height (cards are
+                              square, so otherwise they overflow and push the
+                              docked button bar down on short/desktop windows) */
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* Cap card width so squares don't balloon on the wide desktop column and
+     eat all the vertical space; centre the capped columns. */
+  grid-template-columns: repeat(2, minmax(0, 190px));
+  justify-content: center;
   gap: 14px;
   align-content: center;
+  overflow-y: auto;         /* scroll cards if the window is genuinely too short */
 }
 
 /* Slots */
@@ -514,14 +557,27 @@
 .slimegachi-root .slimegachi-slot.slimegachi-unowned .slimegachi-slot-badge {
   background: rgba(106, 88, 130, 0.2);
   border-color: rgba(106, 88, 130, 0.4);
-  color: var(--slimegachi-muted);
+  color: var(--slimegachi-locked);
 }
 
 /* Shelf actions */
 .slimegachi-root .slimegachi-shelf-actions {
+  /* Docked HUD bar: full-width gradient backdrop, flush to the bottom edge.
+     Negative margins break it out of the shelf's 20px side/bottom padding so
+     the backdrop runs edge-to-edge like the care screen's action bar. */
+  margin: 0 -20px -20px;
+  padding: 12px 20px 18px;
+  background: linear-gradient(to top, rgba(26, 20, 40, 0.95) 55%, transparent);
+}
+.slimegachi-root .slimegachi-shelf-actions-inner {
   display: flex;
-  gap: 6px;
-  padding: 0 4px;
+  gap: 8px;
+  /* Cap + center so the row fills on phones (<440px) but stops stretching into
+     wide empty pills on desktop, where the widget column is up to 540px. */
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  justify-content: center;
 }
 .slimegachi-root .slimegachi-shelf-btn {
   flex: 1;
@@ -529,9 +585,9 @@
   background: rgba(0, 161, 212, 0.10);
   border: 1.5px solid rgba(0, 161, 212, 0.4);
   color: var(--slimegachi-text);
-  padding: 10px 4px;
+  padding: 11px 6px;
   border-radius: 12px;
-  font-size: 9px;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: 600;
@@ -539,17 +595,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 5px;
   font-family: inherit;
 }
 .slimegachi-root .slimegachi-shelf-btn:active { transform: scale(0.96); }
-.slimegachi-root .slimegachi-shelf-btn-ico { font-size: 13px; }
+.slimegachi-root .slimegachi-shelf-btn-ico { font-size: 15px; }
 
 /* Back button */
 .slimegachi-root .slimegachi-back {
   position: absolute;
-  top: 14px;
-  left: 14px;
+  top: 48px;
+  right: 14px;
   z-index: 6;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -605,7 +661,14 @@
   position: absolute;
   top: 60px;
   right: 12px;
-  transform: translateY(-120%);
+  /* Hidden state must clear the top edge entirely. translateY(-120%) only lifts
+     the toast by ~120% of its own height, which from top:60px still leaves it
+     peeking; offset by the full top inset (+ a margin) so it actually leaves
+     the screen. opacity/pointer-events guarantee it can't show or catch clicks
+     while parked. */
+  transform: translateY(calc(-100% - 72px));
+  opacity: 0;
+  pointer-events: none;
   background: linear-gradient(135deg, var(--slimegachi-coin), #f28c38);
   color: #1a1428;
   padding: 12px 18px;
@@ -613,7 +676,7 @@
   font-weight: 700;
   z-index: 30;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
-  transition: transform 0.5s ease;
+  transition: transform 0.5s ease, opacity 0.5s ease;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -622,6 +685,7 @@
 }
 .slimegachi-root .slimegachi-ach-notif.slimegachi-show {
   transform: translateY(0);
+  opacity: 1;
 }
 .slimegachi-root .slimegachi-ach-notif-ico { font-size: 24px; }
 .slimegachi-root .slimegachi-ach-notif-body {
@@ -727,7 +791,7 @@
   padding: 10px 12px;
   border-radius: 8px;
   font-size: 14px;
-  font-family: monospace;
+  font-family: var(--slimegachi-font-ui);
   margin-bottom: 12px;
   text-align: center;
 }
@@ -802,7 +866,7 @@
   color: var(--slimegachi-coin);
   font-weight: 700;
   margin-top: 6px;
-  font-family: monospace;
+  font-family: var(--slimegachi-font-ui);
 }
 .slimegachi-root .slimegachi-shop-item-price.slimegachi-free {
   color: var(--slimegachi-success);
@@ -945,7 +1009,7 @@
 .slimegachi-root .slimegachi-quest-progress {
   font-size: 9px;
   color: var(--slimegachi-muted);
-  font-family: monospace;
+  font-family: var(--slimegachi-font-ui);
 }
 .slimegachi-root .slimegachi-quest-actions {
   display: flex;
@@ -958,7 +1022,7 @@
   font-size: 11px;
   color: var(--slimegachi-coin);
   font-weight: 700;
-  font-family: monospace;
+  font-family: var(--slimegachi-font-ui);
 }
 .slimegachi-root .slimegachi-quest-claim {
   background: rgba(254, 214, 0, 0.22);
@@ -1033,7 +1097,7 @@
   font-size: 13px;
   color: var(--slimegachi-text);
   font-weight: 700;
-  font-family: monospace;
+  font-family: var(--slimegachi-font-ui);
 }
 
 /* Floor in care screen */
@@ -1096,13 +1160,13 @@
   font-size: 18px;
   color: var(--slimegachi-coin);
   font-weight: 700;
-  font-family: monospace;
+  font-family: var(--slimegachi-font-ui);
 }
 .slimegachi-root .slimegachi-minigame-timer {
   font-size: 14px;
   color: var(--slimegachi-accent);
   font-weight: 700;
-  font-family: monospace;
+  font-family: var(--slimegachi-font-ui);
 }
 .slimegachi-root .slimegachi-minigame-stage {
   flex: 1;
@@ -1152,7 +1216,7 @@
   font-size: 48px;
   color: var(--slimegachi-text);
   font-weight: 800;
-  font-family: monospace;
+  font-family: var(--slimegachi-font-ui);
 }
 .slimegachi-root .slimegachi-miniresult-stats {
   display: flex;
@@ -1164,5 +1228,5 @@
 }
 .slimegachi-root .slimegachi-miniresult-stats strong {
   color: var(--slimegachi-success);
-  font-family: monospace;
+  font-family: var(--slimegachi-font-ui);
 }

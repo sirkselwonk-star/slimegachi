@@ -33,14 +33,43 @@ const distJs = srcJs.replace('/*__EMBEDDED_PET_ART__*/ {}', artJson);
 fs.writeFileSync(path.join(DIST, 'slimegachi.js'), distJs);
 console.log('✓ dist/slimegachi.js (' + distJs.length + ' bytes)');
 
-/* 3. Copy CSS */
-const srcCss = fs.readFileSync(path.join(SRC, 'slimegachi.css'), 'utf8');
-fs.writeFileSync(path.join(DIST, 'slimegachi.css'), srcCss);
-console.log('✓ dist/slimegachi.css (' + srcCss.length + ' bytes)');
+/* 3. Embed webfonts as base64 @font-face so dist + standalone are fully
+   self-contained (no external font requests). The faces match the family names
+   referenced by the --slimegachi-font-* tokens in the CSS. JetBrains Mono is a
+   variable font, so one woff2 covers the 400–700 weight range. */
+const FONTS = path.join(ROOT, 'assets', 'fonts');
+const jbmB64 = fs.readFileSync(path.join(FONTS, 'jetbrainsmono-latin.woff2')).toString('base64');
+const wrB64 = fs.readFileSync(path.join(FONTS, 'whiterabbit.woff')).toString('base64');
+const fontFaceCss = [
+  '/* Embedded webfonts — self-contained, no external requests.',
+  '   JetBrains Mono: SIL Open Font License 1.1 (variable, weights 400–700).',
+  '   White Rabbit: © Matthew Welch, free for personal & commercial use. */',
+  "@font-face {",
+  "  font-family: 'JetBrains Mono';",
+  "  font-style: normal;",
+  "  font-weight: 400 700;",
+  "  font-display: swap;",
+  '  src: url(data:font/woff2;base64,' + jbmB64 + ") format('woff2');",
+  "}",
+  "@font-face {",
+  "  font-family: 'White Rabbit';",
+  "  font-style: normal;",
+  "  font-weight: 400;",
+  "  font-display: swap;",
+  '  src: url(data:font/woff;base64,' + wrB64 + ") format('woff');",
+  "}",
+  ""
+].join('\n');
 
-/* 4. Build standalone HTML demo
-   Bundles CSS inline, JS inline, and auto-mounts on DOMContentLoaded.
-   This file works in the Claude sandbox (no external requests). */
+/* 4. Copy CSS (with the embedded faces prepended) */
+const srcCss = fs.readFileSync(path.join(SRC, 'slimegachi.css'), 'utf8');
+const distCss = fontFaceCss + srcCss;
+fs.writeFileSync(path.join(DIST, 'slimegachi.css'), distCss);
+console.log('✓ dist/slimegachi.css (' + distCss.length + ' bytes, fonts embedded)');
+
+/* 5. Build standalone HTML demo
+   Bundles CSS inline (with embedded fonts), JS inline, and auto-mounts on
+   DOMContentLoaded. Fully self-contained — works offline, no external requests. */
 const standaloneHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -51,7 +80,7 @@ const standaloneHtml = `<!DOCTYPE html>
 html,body{height:100%;margin:0;background:#0a0612;color:#e8e0f4;font-family:system-ui,sans-serif;overflow:hidden;}
 body{display:flex;align-items:center;justify-content:center;}
 #slimegachi-mount{width:100%;height:100%;max-width:540px;max-height:960px;}
-${srcCss}
+${distCss}
 </style>
 </head>
 <body>

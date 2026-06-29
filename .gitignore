@@ -2,6 +2,12 @@
 assets/
 comfyui/
 
+# ...but the package's build inputs ARE tracked, so `node scripts/build.js` is
+# reproducible from a clean clone (pet-art SVGs + embedded fonts). Only the
+# top-level assets/ above stays local.
+!slimegachi-pkg/assets/
+!slimegachi-pkg/assets/**
+
 # Delivery archives
 files.zip
 files_2.zip
