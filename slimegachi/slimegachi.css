@@ -202,6 +202,15 @@
   font-size: 22px;
   line-height: 1;
 }
+/* Custom line icons inherit their size from the container font-size (1em) and
+   their colour from currentColor. One rule covers every icon slot. */
+.slimegachi-root svg.slimegachi-ico {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: -0.15em;
+  flex: none;
+}
 
 /* Stats overlay (care screen) */
 .slimegachi-root .slimegachi-stats {
