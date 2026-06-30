@@ -548,7 +548,8 @@
     sound:    svgIcon('<path d="M4 9.5v5h3.5L12 19V5L7.5 9.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18 6.5a7.5 7.5 0 0 1 0 11"/>'),
     soundOff: svgIcon('<path d="M4 9.5v5h3.5L12 19V5L7.5 9.5H4z"/><path d="M16.5 9.5l5 5"/><path d="M21.5 9.5l-5 5"/>'),
     music:    svgIcon('<path d="M9 17V5l10-2v12"/><circle cx="6.5" cy="17" r="2.5"/><circle cx="16.5" cy="15" r="2.5"/>'),
-    musicOff: svgIcon('<path d="M9 17V5l10-2v12"/><circle cx="6.5" cy="17" r="2.5"/><circle cx="16.5" cy="15" r="2.5"/><path d="M4 4.5l16 16"/>')
+    musicOff: svgIcon('<path d="M9 17V5l10-2v12"/><circle cx="6.5" cy="17" r="2.5"/><circle cx="16.5" cy="15" r="2.5"/><path d="M4 4.5l16 16"/>'),
+    check:    svgIcon('<path d="M5 12.5l4.5 4.5L19 7"/>')
   };
 
   /* HTML template injected into the host container */
@@ -1481,9 +1482,9 @@
           const filled = raw > 0 && raw < 1 ? 1 : Math.round(raw);
           badge += ' ' + '●'.repeat(filled) + '○'.repeat(5 - filled);
         } else {
-          badge += ' ★ MAX';
+          badge += ' ' + ACH_ICONS.star + ' MAX';
         }
-        lvlEl.textContent = badge;
+        lvlEl.innerHTML = badge;
       }
     }
     function spawnActionFeedback(label, isFav) {
@@ -2411,7 +2412,7 @@
           '<div class="slimegachi-quest-actions">' +
             '<div class="slimegachi-quest-reward">+' + def.reward + ' ' + MISC_ICONS.coin + '</div>' +
             (isClaimed ?
-              '<div class="slimegachi-quest-status">Claimed ✓</div>' :
+              '<div class="slimegachi-quest-status">Claimed ' + ICONS.check + '</div>' :
               isReady ?
                 '<button class="slimegachi-quest-claim" data-quest="' + def.id + '">Claim</button>' :
                 '<div class="slimegachi-quest-status">In Progress</div>'
