@@ -451,27 +451,42 @@
     flame:    svgC('<path d="M12 3c3 4 5 6.2 5 9.2a5 5 0 0 1-10 0c0-1.5.5-2.7 1.4-3.9.3 1 .8 1.6 1.6 2C11.2 7.7 11.6 5.6 12 3z" fill="#ff7a3c"/><path d="M12 19a2.4 2.4 0 0 0 2.4-2.4c0-1.3-1-2.1-2.4-3.8-1.4 1.7-2.4 2.5-2.4 3.8A2.4 2.4 0 0 0 12 19z" fill="#ffd23f"/>')
   };
 
+  /* Rasterize an inline icon to an <img> so the canvas mini-games can draw the
+     same kawaii sprites the rest of the UI uses (a data-URI SVG needs an explicit
+     xmlns, which the inline-HTML icons omit). */
+  function spriteImg(svgMarkup) {
+    const img = new Image();
+    img.src = 'data:image/svg+xml;charset=utf-8,' +
+      encodeURIComponent(svgMarkup.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" '));
+    return img;
+  }
+  const CATCH_SPRITES = {
+    golden: spriteImg(ACH_ICONS.star),
+    rotten: spriteImg(MISC_ICONS.sick),
+    banana: spriteImg(FOOD_ICONS.banana)
+  };
+
   const SPEECH = {
     Kitten: {
-      happy:  ['purr...', 'play with me!', 'got treats?', 'love you 💕', 'mrow!'],
+      happy:  ['purr...', 'play with me!', 'got treats?', 'love you ' + EMOTE_ICONS['💖'], 'mrow!'],
       okay:   ['mrrp?', '*licks paw*', 'meow.', 'hmm...'],
       sad:    ['mew...', 'need food', 'so lonely...', 'please pay attention'],
       sleepy: ['*yawn*', 'zzz...', 'tired', 'so sleepy...']
     },
     Monkey: {
-      happy:  ['ook ook!', 'BANANA!', 'fun time!', '🍌🍌🍌', 'wheeee'],
+      happy:  ['ook ook!', 'BANANA!', 'fun time!', FOOD_ICONS.banana + FOOD_ICONS.banana + FOOD_ICONS.banana, 'wheeee'],
       okay:   ['hmm', '*scratches*', 'where banana', 'eh.'],
       sad:    ['ook... :(', 'hungry monkey', 'sad ook', 'where banana :('],
       sleepy: ['too tired to ook', 'zzz', 'need nap', '*yawns*']
     },
     Owl: {
-      happy:  ['Hoot!', 'big moon tonight', '🦉✨', 'wise & happy'],
+      happy:  ['Hoot!', 'big moon tonight', 'hoo ' + ACH_ICONS.sparkle, 'wise and happy'],
       okay:   ['hoo.', '*blinks slowly*', 'observing'],
       sad:    ['hoo... :(', 'cold night', 'so quiet'],
       sleepy: ['day means sleep', '*nestles*', 'zzz hoot']
     },
     Dragon: {
-      happy:  ['🔥🔥🔥', 'RAWR!', 'feeling spicy', 'breath strong'],
+      happy:  [MISC_ICONS.flame + MISC_ICONS.flame + MISC_ICONS.flame, 'RAWR!', 'feeling spicy', 'breath strong'],
       okay:   ['rumble.', '*sniffs air*', 'hmm.'],
       sad:    ['flame... low...', 'need bath', 'scales itchy'],
       sleepy: ['dragons rarely sleep', '*tail twitch*', 'zzz...']
@@ -603,12 +618,12 @@
         '  <span data-sg="dev-mode">stub</span>' +
         '  <button data-sg="dev-toggle">switch</button>' +
         '  <button data-sg="dev-skip">+1h</button>' +
-        '  <button data-sg="dev-time">⏰</button>' +
+        '  <button data-sg="dev-time">time</button>' +
         '  <button data-sg="dev-reset">reset</button>' +
         '</div>'
       ) : '',
       '<div class="slimegachi-ach-notif" data-sg="ach-notif">',
-      '  <div class="slimegachi-ach-notif-ico">🏆</div>',
+      '  <div class="slimegachi-ach-notif-ico">' + MISC_ICONS.trophy + '</div>',
       '  <div class="slimegachi-ach-notif-body">',
       '    <div class="slimegachi-ach-notif-title">Achievement Unlocked</div>',
       '    <div class="slimegachi-ach-notif-name" data-sg="ach-notif-name"></div>',
@@ -627,7 +642,7 @@
       '  <h2>' + ICONS.shop + ' SLIME Shop</h2>',
       '  <p style="text-align:center;font-size:11px">Your coins: <strong style="color:var(--slimegachi-coin);font-family:monospace" data-sg="shop-coins">0</strong></p>',
       '  <div class="slimegachi-shop-grid" data-sg="shop-grid"></div>',
-      '  <p style="text-align:center;font-size:10px;color:var(--slimegachi-dim);margin-top:8px">⭐ = your pet\'s favorite (1.5× boost)</p>',
+      '  <p style="text-align:center;font-size:10px;color:var(--slimegachi-dim);margin-top:8px">' + ACH_ICONS.star + ' = your pet\'s favorite (1.5× boost)</p>',
       '  <div class="slimegachi-modal-row"><button class="slimegachi-modal-btn slimegachi-alt" data-sg="shop-close">Close</button></div>',
       '</div></div>',
       '<div class="slimegachi-modal" data-sg="ach-modal"><div class="slimegachi-modal-panel">',
@@ -1132,7 +1147,7 @@
       p.stats.hunger = clamp(p.stats.hunger + food.hunger * mult * timeMult, 0, 100);
       p.stats.happy  = clamp(p.stats.happy  + food.happy  * mult * timeMult, 0, 100);
       p.stats.clean  = clamp(p.stats.clean  + food.clean, 0, 100);
-      spawnActionFeedback(food.name + (isFav ? ' 💖' : '') + (sleeping ? ' (sleepy)' : ''), isFav);
+      spawnActionFeedback(food.name + (isFav ? ' ' + EMOTE_ICONS['💖'] : '') + (sleeping ? ' (sleepy)' : ''), isFav);
       triggerCareAnimation('feed');
       triggerMouthChew();
       if (isFav) { spawnEmote('💖'); setTimeout(() => spawnEmote('⭐'), 220); }
@@ -1223,7 +1238,7 @@
       if (lines.length === 0) { scheduleNextBubble(); return; }
       const line = lines[Math.floor(Math.random() * lines.length)];
       const bub = $('speech');
-      bub.textContent = line;
+      bub.innerHTML = line;
       bub.style.display = 'block';
       const img = $('petimg'), stage = $('stage');
       const imgR = img.getBoundingClientRect();
@@ -1242,7 +1257,7 @@
     const EVENTS = {
       foundCoin: {
         icon: MISC_ICONS.coin, autoResolve: true,
-        apply() { State.coins += 5; addStat('happy', 2); renderCoins(); return '+5 🪙'; }
+        apply() { State.coins += 5; addStat('happy', 2); renderCoins(); return '+5 ' + MISC_ICONS.coin; }
       },
       petSick: {
         icon: MISC_ICONS.sick, autoResolve: false,
@@ -1250,7 +1265,7 @@
       },
       treasure: {
         icon: ACH_ICONS.diamond, autoResolve: true,
-        apply() { State.coins += 30; addStat('happy', 8); renderCoins(); return '+30 🪙 +8 ❤️'; }
+        apply() { State.coins += 30; addStat('happy', 8); renderCoins(); return '+30 ' + MISC_ICONS.coin + ' +8 ' + EMOTE_ICONS['💖']; }
       }
     };
     let eventCheckTimer = null;
@@ -1470,7 +1485,7 @@
       const stage = $('stage');
       const f = document.createElement('div');
       f.className = 'slimegachi-feedback';
-      f.textContent = label;
+      f.innerHTML = label;
       const rect = stage.getBoundingClientRect();
       f.style.left = (rect.width / 2) + 'px';
       f.style.top  = (rect.height * 0.42) + 'px';
@@ -1909,7 +1924,7 @@
       const root = container;
       const f = document.createElement('div');
       f.className = 'slimegachi-feedback';
-      f.textContent = label;
+      f.innerHTML = label;
       f.style.left = '50%';
       f.style.top = '50%';
       f.style.color = '#ffd966';
@@ -2199,11 +2214,11 @@
           const roll = Math.random();
           let item;
           if (roll < 0.05) {
-            item = { kind: 'golden', emoji: '⭐', x: 20 + Math.random() * (this.width - 40), y: -20, vy: 2.5 + Math.random() * 1.0, points: 15, radius: 18 };
+            item = { kind: 'golden', x: 20 + Math.random() * (this.width - 40), y: -20, vy: 2.5 + Math.random() * 1.0, points: 15, radius: 18 };
           } else if (roll < 0.20) {
-            item = { kind: 'rotten', emoji: '🦟', x: 20 + Math.random() * (this.width - 40), y: -20, vy: 3.0 + Math.random() * 1.5, points: -8, radius: 16 };
+            item = { kind: 'rotten', x: 20 + Math.random() * (this.width - 40), y: -20, vy: 3.0 + Math.random() * 1.5, points: -8, radius: 16 };
           } else {
-            item = { kind: 'banana', emoji: '🍌', x: 20 + Math.random() * (this.width - 40), y: -20, vy: 2.0 + Math.random() * 1.8, points: 5, radius: 18 };
+            item = { kind: 'banana', x: 20 + Math.random() * (this.width - 40), y: -20, vy: 2.0 + Math.random() * 1.8, points: 5, radius: 18 };
           }
           this.items.push(item);
           this.spawnTimer = 460 + Math.random() * 240;
@@ -2229,10 +2244,16 @@
             continue;
           }
           if (it.y > this.height + 30) { this.items.splice(i, 1); continue; }
-          ctx.font = (it.radius * 1.6) + 'px system-ui';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(it.emoji, it.x, it.y);
+          const sprite = CATCH_SPRITES[it.kind];
+          const sz = it.radius * 2;
+          if (sprite && sprite.complete && sprite.naturalWidth) {
+            ctx.drawImage(sprite, it.x - it.radius, it.y - it.radius, sz, sz);
+          } else {
+            ctx.fillStyle = it.kind === 'golden' ? '#ffd23f' : it.kind === 'rotten' ? '#a3cf63' : '#f2d23e';
+            ctx.beginPath();
+            ctx.arc(it.x, it.y, it.radius, 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
 
         /* Draw basket */
@@ -2305,11 +2326,11 @@
         const div = document.createElement('div');
         div.className = 'slimegachi-shop-item' + (isFav ? ' slimegachi-fav' : '') + (canAfford ? '' : ' slimegachi-disabled');
         div.innerHTML =
-          (isFav ? '<div class="slimegachi-shop-fav-tag">⭐</div>' : '') +
+          (isFav ? '<div class="slimegachi-shop-fav-tag">' + ACH_ICONS.star + '</div>' : '') +
           '<div class="slimegachi-shop-item-ico">' + food.icon + '</div>' +
           '<div class="slimegachi-shop-item-name">' + food.name + '</div>' +
           '<div class="slimegachi-shop-item-desc">' + food.desc + '</div>' +
-          '<div class="slimegachi-shop-item-price' + (food.cost === 0 ? ' slimegachi-free' : '') + '">' + (food.cost === 0 ? 'Free' : food.cost + ' 🪙') + '</div>';
+          '<div class="slimegachi-shop-item-price' + (food.cost === 0 ? ' slimegachi-free' : '') + '">' + (food.cost === 0 ? 'Free' : food.cost + ' ' + MISC_ICONS.coin) + '</div>';
         if (canAfford) {
           div.addEventListener('click', () => {
             if (target === 'feed-grid') { applyFood(food.id); }
@@ -2383,7 +2404,7 @@
             '<div class="slimegachi-quest-progress">' + q.progress + '/' + def.target + '</div>' +
           '</div>' +
           '<div class="slimegachi-quest-actions">' +
-            '<div class="slimegachi-quest-reward">+' + def.reward + ' 🪙</div>' +
+            '<div class="slimegachi-quest-reward">+' + def.reward + ' ' + MISC_ICONS.coin + '</div>' +
             (isClaimed ?
               '<div class="slimegachi-quest-status">Claimed ✓</div>' :
               isReady ?
