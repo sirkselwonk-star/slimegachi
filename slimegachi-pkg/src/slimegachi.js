@@ -501,10 +501,13 @@
   const EVENT_CHECK_INTERVAL_MS = 60000;
   const SLEEP_BONUS_MULT = 1.5;
   const WRONG_TIME_PENALTY = 0.5;
-  /* A bath only counts toward leveling when the pet was actually dirty.
-     Cleaning an already-clean pet still tops up the stat but earns no care
-     credit, so the free Clean button can't be spammed for easy levels. */
-  const CLEAN_CARE_THRESHOLD = 60;
+  /* A care action only counts toward leveling when it meets a genuine need —
+     the relevant stat is below its threshold beforehand. Topping up an already
+     satisfied pet still applies the stat boost but earns no care credit, so the
+     free Clean / Sleep / Snack buttons can't be spammed for easy levels. */
+  const CLEAN_CARE_THRESHOLD = 60;  // clean
+  const SLEEP_CARE_THRESHOLD = 60;  // energy
+  const FEED_CARE_THRESHOLD  = 60;  // hunger
 
   const DEFAULT_MIRROR_NODES = [
     'https://mainnet-public.mirrornode.hedera.com/api/v1',
@@ -1106,9 +1109,11 @@
       const boosts = action === 'sleep' ? { energy: 40 } : action === 'clean' ? { clean: 40 } : {};
       const sideEffects = action === 'clean' ? { happy: -2 } : {};
 
-      /* Anti-spam: a bath only earns care credit (and thus level progress)
-         when the pet was below the clean threshold. Other actions always count. */
-      const rewardsCare = action === 'clean' ? (p.stats.clean < CLEAN_CARE_THRESHOLD) : true;
+      /* Anti-spam: clean/sleep only earn care credit (and thus level progress)
+         when the relevant stat was below its threshold beforehand. */
+      const rewardsCare = action === 'clean' ? (p.stats.clean  < CLEAN_CARE_THRESHOLD)
+                        : action === 'sleep' ? (p.stats.energy < SLEEP_CARE_THRESHOLD)
+                        : true;
 
       for (const [stat, amt] of Object.entries(boosts)) {
         p.stats[stat] = clamp(p.stats[stat] + amt * multiplier, 0, 100);
@@ -1139,6 +1144,8 @@
       if (!p) return;
       if (food.cost > 0 && !Currency.spend(food.cost, 'food:' + foodId)) return;
       applyDecay();
+      const wasSick = p.sick;                 // capture before a remedy clears it
+      const hungryBefore = p.stats.hunger;    // capture before the hunger boost
       const def = PET_DEFS[p.pet];
       const isFav = def.favoriteFood === foodId;
       const mult = isFav ? 1.5 : 1.0;
@@ -1165,7 +1172,10 @@
       if (isFav) fireAchievement('pickyEater');
       checkPassiveAchievements();
       safeEmit('onCareAction', { action: 'feed', food: foodId, petSerial: p.serial, petType: p.pet, stats: Object.assign({}, p.stats) });
-      emitInternal('care_action', { action: 'feed', food: foodId, isFavoriteFood: isFav, petSerial: p.serial, petType: p.pet, petKey: State.activeKey });
+      /* Anti-spam: feeding only earns care credit when the pet was actually
+         hungry, or when a remedy (medicine) cured a genuinely sick pet. */
+      const rewardsCare = Boolean((hungryBefore < FEED_CARE_THRESHOLD) || (food.healsSick && wasSick));
+      emitInternal('care_action', { action: 'feed', food: foodId, isFavoriteFood: isFav, petSerial: p.serial, petType: p.pet, petKey: State.activeKey, rewardsCare: rewardsCare });
       persist();
       closeFeedModal();
     }
