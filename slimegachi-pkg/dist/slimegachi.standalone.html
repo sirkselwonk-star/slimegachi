@@ -1780,6 +1780,10 @@ body{display:flex;align-items:center;justify-content:center;}
   const EVENT_CHECK_INTERVAL_MS = 60000;
   const SLEEP_BONUS_MULT = 1.5;
   const WRONG_TIME_PENALTY = 0.5;
+  /* A bath only counts toward leveling when the pet was actually dirty.
+     Cleaning an already-clean pet still tops up the stat but earns no care
+     credit, so the free Clean button can't be spammed for easy levels. */
+  const CLEAN_CARE_THRESHOLD = 60;
 
   const DEFAULT_MIRROR_NODES = [
     'https://mainnet-public.mirrornode.hedera.com/api/v1',
@@ -2381,6 +2385,10 @@ body{display:flex;align-items:center;justify-content:center;}
       const boosts = action === 'sleep' ? { energy: 40 } : action === 'clean' ? { clean: 40 } : {};
       const sideEffects = action === 'clean' ? { happy: -2 } : {};
 
+      /* Anti-spam: a bath only earns care credit (and thus level progress)
+         when the pet was below the clean threshold. Other actions always count. */
+      const rewardsCare = action === 'clean' ? (p.stats.clean < CLEAN_CARE_THRESHOLD) : true;
+
       for (const [stat, amt] of Object.entries(boosts)) {
         p.stats[stat] = clamp(p.stats[stat] + amt * multiplier, 0, 100);
       }
@@ -2399,7 +2407,7 @@ body{display:flex;align-items:center;justify-content:center;}
       if (action === 'sleep' && sleeping) Currency.earn(3, 'tucked_in');
       checkPassiveAchievements();
       safeEmit('onCareAction', { action: action, petSerial: p.serial, petType: p.pet, stats: Object.assign({}, p.stats) });
-      emitInternal('care_action', { action: action, petSerial: p.serial, petType: p.pet, petKey: State.activeKey });
+      emitInternal('care_action', { action: action, petSerial: p.serial, petType: p.pet, petKey: State.activeKey, rewardsCare: rewardsCare });
       scheduleBlink();
       persist();
     }
@@ -3080,6 +3088,8 @@ body{display:flex;align-items:center;justify-content:center;}
     onInternal('care_action', (ev) => {
       const p = State.pets[ev.petKey];
       if (!p) return;
+      /* A bath on an already-clean pet earns no level progress (anti-spam). */
+      if (ev.rewardsCare === false) return;
       const before = p.care_count || 0;
       p.care_count = before + 1;
       const oldLvl = levelForCount(before);
