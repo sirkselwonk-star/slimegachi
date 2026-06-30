@@ -289,6 +289,19 @@
   --slimegachi-ring-track: rgba(0, 0, 0, 0.16);
 }
 
+/* Action bar over a bright sky (e.g. the Kitten's peach daytime): the off-white
+   label + icon wash out, so switch them to SLIME green with a dark lift for the
+   parts of the buttons that overlap the light gradient. */
+.slimegachi-root.slimegachi-lightsky .slimegachi-actbtn {
+  color: var(--slimegachi-accent);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+.slimegachi-root.slimegachi-lightsky .slimegachi-actbtn svg.slimegachi-ico {
+  /* symmetric dark halo so the green strokes stay legible where the icon
+     overlaps the light part of the sky gradient */
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8));
+}
+
 /* Pet name + mood */
 .slimegachi-root .slimegachi-petheader {
   position: absolute;
