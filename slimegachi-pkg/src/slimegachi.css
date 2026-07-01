@@ -661,7 +661,7 @@
 /* Emote bubble floaters — emojis that drift up from the pet's head */
 .slimegachi-root .slimegachi-emote {
   position: absolute;
-  font-size: 28px;
+  font-size: 34px;
   pointer-events: none;
   z-index: 6;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
