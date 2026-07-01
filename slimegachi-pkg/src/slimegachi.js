@@ -2367,6 +2367,9 @@
       musicForCurrentView();
       $('minigame').classList.add('slimegachi-show');
       $('miniresult').classList.remove('slimegachi-show');
+      /* Hide the topbar back button during the game + results — navigation is
+         via the in-game Exit and the results' "Back to Pet" buttons only. */
+      $('back').classList.remove('slimegachi-show');
       if (bubbleTimer) clearTimeout(bubbleTimer);
       if (eventCheckTimer) clearTimeout(eventCheckTimer);
       $('speech').style.display = 'none';
@@ -2375,6 +2378,7 @@
     function closeMiniGame() {
       $('minigame').classList.remove('slimegachi-show');
       $('miniresult').classList.remove('slimegachi-show');
+      $('back').classList.add('slimegachi-show');
       State.view = 'care';
       musicForCurrentView();
       scheduleNextBubble();
