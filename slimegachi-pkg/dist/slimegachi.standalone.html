@@ -45,13 +45,12 @@ body{display:flex;align-items:center;justify-content:center;}
   --slimegachi-success: #7fffd4;
   --slimegachi-favorite: #ffb3d9;
 
-  /* Type system. Display = White Rabbit (the LCD-ish brand face) for the wordmark
-     and numeric readouts; UI = JetBrains Mono as the workhorse for labels, buttons
-     and body copy. Both fall back through JetBrains Mono to the platform monospace,
-     so the widget degrades cleanly if the host page hasn't loaded the webfonts.
-     (Major Mono Display was loaded but never referenced — dropped from index.html.) */
+  /* Type system. White Rabbit (the LCD-ish brand face) is used everywhere — both
+     display (wordmark, numeric readouts) and UI (labels, buttons, body) — falling
+     back through JetBrains Mono to the platform monospace so the widget degrades
+     cleanly if the host page hasn't loaded the webfonts. */
   --slimegachi-font-display: 'White Rabbit', 'JetBrains Mono', ui-monospace, monospace;
-  --slimegachi-font-ui: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --slimegachi-font-ui: 'White Rabbit', 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Care-screen HUD ink — defaults to light-on-dark (the normal dark/dusk/night
      sky). Flipped to dark-on-light by .slimegachi-lightsky when the active pet's
@@ -2006,20 +2005,20 @@ body{display:flex;align-items:center;justify-content:center;}
       '</div></div>',
       '<div class="slimegachi-modal" data-sg="shop-modal"><div class="slimegachi-modal-panel">',
       '  <h2>' + ICONS.shop + ' SLIME Shop</h2>',
-      '  <p style="text-align:center;font-size:11px">Your coins: <strong style="color:var(--slimegachi-coin);font-family:monospace" data-sg="shop-coins">0</strong></p>',
+      '  <p style="text-align:center;font-size:11px">Your coins: <strong style="color:var(--slimegachi-coin);font-family:var(--slimegachi-font-display)" data-sg="shop-coins">0</strong></p>',
       '  <div class="slimegachi-shop-grid" data-sg="shop-grid"></div>',
       '  <p style="text-align:center;font-size:10px;color:var(--slimegachi-dim);margin-top:8px">' + ACH_ICONS.star + ' = your pet\'s favorite (1.5× boost)</p>',
       '  <div class="slimegachi-modal-row"><button class="slimegachi-modal-btn slimegachi-alt" data-sg="shop-close">Close</button></div>',
       '</div></div>',
       '<div class="slimegachi-modal" data-sg="ach-modal"><div class="slimegachi-modal-panel">',
       '  <h2>' + ICONS.badges + ' Badges</h2>',
-      '  <p style="text-align:center;font-size:11px;color:var(--slimegachi-dim)">Unlocked <strong data-sg="ach-count" style="color:var(--slimegachi-coin);font-family:monospace">0/0</strong></p>',
+      '  <p style="text-align:center;font-size:11px;color:var(--slimegachi-dim)">Unlocked <strong data-sg="ach-count" style="color:var(--slimegachi-coin);font-family:var(--slimegachi-font-display)">0/0</strong></p>',
       '  <div class="slimegachi-ach-list" data-sg="ach-list"></div>',
       '  <div class="slimegachi-modal-row"><button class="slimegachi-modal-btn slimegachi-alt" data-sg="ach-close">Close</button></div>',
       '</div></div>',
       '<div class="slimegachi-modal" data-sg="feed-modal"><div class="slimegachi-modal-panel">',
       '  <h2>' + ICONS.feed + ' Choose Food</h2>',
-      '  <p style="text-align:center;font-size:11px">Your coins: <strong style="color:var(--slimegachi-coin);font-family:monospace" data-sg="feed-coins">0</strong></p>',
+      '  <p style="text-align:center;font-size:11px">Your coins: <strong style="color:var(--slimegachi-coin);font-family:var(--slimegachi-font-display)" data-sg="feed-coins">0</strong></p>',
       '  <div class="slimegachi-shop-grid" data-sg="feed-grid"></div>',
       '  <div class="slimegachi-modal-row"><button class="slimegachi-modal-btn slimegachi-alt" data-sg="feed-close">Cancel</button></div>',
       '</div></div>',

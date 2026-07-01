@@ -35,13 +35,12 @@
   --slimegachi-success: #7fffd4;
   --slimegachi-favorite: #ffb3d9;
 
-  /* Type system. Display = White Rabbit (the LCD-ish brand face) for the wordmark
-     and numeric readouts; UI = JetBrains Mono as the workhorse for labels, buttons
-     and body copy. Both fall back through JetBrains Mono to the platform monospace,
-     so the widget degrades cleanly if the host page hasn't loaded the webfonts.
-     (Major Mono Display was loaded but never referenced — dropped from index.html.) */
+  /* Type system. White Rabbit (the LCD-ish brand face) is used everywhere — both
+     display (wordmark, numeric readouts) and UI (labels, buttons, body) — falling
+     back through JetBrains Mono to the platform monospace so the widget degrades
+     cleanly if the host page hasn't loaded the webfonts. */
   --slimegachi-font-display: 'White Rabbit', 'JetBrains Mono', ui-monospace, monospace;
-  --slimegachi-font-ui: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --slimegachi-font-ui: 'White Rabbit', 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Care-screen HUD ink — defaults to light-on-dark (the normal dark/dusk/night
      sky). Flipped to dark-on-light by .slimegachi-lightsky when the active pet's
