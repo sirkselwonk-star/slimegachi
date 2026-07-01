@@ -229,7 +229,7 @@
 /* Stats overlay (care screen) */
 .slimegachi-root .slimegachi-stats {
   position: absolute;
-  top: 12px;
+  top: 20px;
   left: auto;
   right: 14px;
   z-index: 4;
