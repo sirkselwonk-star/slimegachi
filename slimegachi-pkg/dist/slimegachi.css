@@ -1332,6 +1332,6 @@
   letter-spacing: 1px;
 }
 .slimegachi-root .slimegachi-miniresult-stats strong {
-  color: var(--slimegachi-success);
+  color: var(--slimegachi-accent);
   font-family: var(--slimegachi-font-ui);
 }
