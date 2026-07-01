@@ -120,8 +120,19 @@ body{display:flex;align-items:center;justify-content:center;}
   position: relative;
   z-index: 5;
   gap: 8px;
-  /* Dark scrim behind the top controls for contrast on light daytime skies. */
-  background: linear-gradient(to bottom, rgba(26, 20, 40, 0.94) 70%, transparent);
+}
+/* Dark scrim behind the top controls, extending a little below them, for
+   contrast on light daytime skies. Fades out above the info column. */
+.slimegachi-root .slimegachi-topbar::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: -12px;
+  background: linear-gradient(to bottom, rgba(26, 20, 40, 0.94) 78%, transparent);
+  z-index: -1;
+  pointer-events: none;
 }
 .slimegachi-root .slimegachi-brand {
   font-family: var(--slimegachi-font-display);
