@@ -90,6 +90,19 @@ ${distJs}
 </script>
 <script>
 window.addEventListener('DOMContentLoaded', function(){
+  // Demo reset: load with ?reset=1 to wipe saved progress and start from a
+  // clean Level-0 slate on any device; the param is then stripped from the URL.
+  var params = new URLSearchParams(location.search);
+  if (params.has('reset')) {
+    try {
+      Object.keys(localStorage)
+        .filter(function(k){ return k.indexOf('slimegachi') === 0; })
+        .forEach(function(k){ localStorage.removeItem(k); });
+    } catch (e) {}
+    params.delete('reset');
+    var qs = params.toString();
+    history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+  }
   window.__game = SLIMEgachi.mount(document.getElementById('slimegachi-mount'), {
     showDevPanel: true,
     events: {
