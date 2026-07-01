@@ -648,10 +648,10 @@
   padding: 12px 20px 18px;
   position: relative;
 }
-/* Dark scrim behind the shelf action buttons — like the care screen's bottom
-   bar, but darker than the standard #1a1428 so it stands out against the
-   selection screen's already-dark purple background. Covers the buttons and
-   fades out just above them. */
+/* Dark scrim behind the shelf action buttons. The care screen's #1a1428 is
+   invisible here (it matches the bottom of this screen's dark-purple radial
+   background), so use the same purple hue a touch darker — visible as a band
+   but softer than a near-black. Covers the buttons and fades out above them. */
 .slimegachi-root .slimegachi-shelf-actions::before {
   content: '';
   position: absolute;
@@ -659,7 +659,7 @@
   right: 0;
   bottom: 0;
   top: -22px;
-  background: linear-gradient(to top, rgba(6, 7, 11, 0.92) 82%, transparent);
+  background: linear-gradient(to top, rgba(16, 13, 26, 0.92) 82%, transparent);
   z-index: -1;
   pointer-events: none;
 }
