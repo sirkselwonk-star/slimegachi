@@ -47,6 +47,25 @@
     // v1.5 packaged build. Stub mode out of the box (Kitten + Monkey playable,
     // Owl + Dragon as locked mint-2 teasers). Wallet/storage/theme plug-in
     // points documented in slimegachi-pkg/README.md.
+
+    // Demo reset: load with ?reset=1 to wipe saved progress and start from a
+    // clean Level-0 slate on any device (state normally persists in the
+    // browser's localStorage). Runs before mount() reads state, then strips the
+    // param so a later refresh doesn't keep resetting.
+    (function () {
+      var params = new URLSearchParams(location.search);
+      if (params.has('reset')) {
+        try {
+          Object.keys(localStorage)
+            .filter(function (k) { return k.indexOf('slimegachi') === 0; })
+            .forEach(function (k) { localStorage.removeItem(k); });
+        } catch (e) {}
+        params.delete('reset');
+        var qs = params.toString();
+        history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+      }
+    })();
+
     const game = SLIMEgachi.mount(document.getElementById('slimegachi'), {
       theme: { accent: '#4ade80' }  // SLIME HUD green
     });
