@@ -350,20 +350,20 @@
 }
 .slimegachi-root .slimegachi-petmood {
   font-size: 13px;
-  color: var(--slimegachi-hud-accent);
+  color: var(--slimegachi-hud-text);
   text-transform: uppercase;
   letter-spacing: 2px;
   margin-top: 4px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
+  text-shadow: var(--slimegachi-hud-shadow);
   opacity: 0.9;
 }
 .slimegachi-root .slimegachi-petlevel {
   font-size: 14px;
-  color: var(--slimegachi-accent);
+  color: var(--slimegachi-hud-text);
   letter-spacing: 1px;
   margin-top: 4px;
   font-family: var(--slimegachi-font-display);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
+  text-shadow: var(--slimegachi-hud-shadow);
   opacity: 0.85;
 }
 .slimegachi-root .slimegachi-petlevel:empty { display: none; }
