@@ -584,7 +584,7 @@
       '  </div>',
       '  <div class="slimegachi-shelf" data-sg="shelf">',
       '    <div class="slimegachi-shelf-title">Your Pets</div>',
-      '    <div class="slimegachi-shelf-sub">Tap a SLIME to care for it</div>',
+      '    <div class="slimegachi-shelf-sub">Tap a SLIME Pet to care for it</div>',
       '    <div class="slimegachi-status" data-sg="status"></div>',
       '    <div class="slimegachi-shelf-grid" data-sg="shelf-grid"></div>',
       '    <div class="slimegachi-shelf-actions">',

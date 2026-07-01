@@ -501,7 +501,7 @@
 .slimegachi-root .slimegachi-shelf-sub {
   text-align: center;
   font-size: 10px;
-  color: var(--slimegachi-dim);
+  color: var(--slimegachi-accent);
   letter-spacing: 1.5px;
   margin-bottom: 4px;
 }
