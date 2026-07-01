@@ -108,10 +108,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  background: rgba(254, 214, 0, 0.12);
-  border: 1px solid rgba(254, 214, 0, 0.4);
-  padding: 4px 10px;
-  border-radius: 12px;
+  padding: 4px 2px;
   font-size: 12px;
   font-weight: 700;
   color: var(--slimegachi-coin);
