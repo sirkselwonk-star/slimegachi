@@ -254,8 +254,8 @@
 .slimegachi-root .slimegachi-gauge-ring {
   --pct: 100;
   --col: #7fffd4;
-  width: 42px;
-  height: 42px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background:
     radial-gradient(closest-side, var(--slimegachi-bg_top) 68%, transparent 69% 100%),
@@ -267,12 +267,12 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 .slimegachi-root .slimegachi-gauge-ico {
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1;
 }
 .slimegachi-root .slimegachi-gauge-val {
   font-family: var(--slimegachi-font-display);
-  font-size: 12px;
+  font-size: 13px;
   color: var(--slimegachi-hud-text);
   text-shadow: var(--slimegachi-hud-shadow-sm);
 }
