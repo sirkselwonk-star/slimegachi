@@ -344,7 +344,7 @@
 /* Shrink the ● / ○ progress dots so the level line reads the same size as the
    coin count; the raw glyphs render ~1.5x the text height otherwise. */
 .slimegachi-root .slimegachi-lvl-dots {
-  font-size: 0.66em;
+  font-size: 0.72em;
   letter-spacing: 2px;
   vertical-align: middle;
 }
