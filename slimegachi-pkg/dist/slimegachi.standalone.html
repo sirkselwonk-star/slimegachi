@@ -3622,7 +3622,7 @@ body{display:flex;align-items:center;justify-content:center;}
           } else if (roll < 0.20) {
             item = { kind: 'rotten', x: 20 + Math.random() * (this.width - 40), y: -20, vy: 3.0 + Math.random() * 1.5, points: -8, radius: 16 };
           } else {
-            item = { kind: 'banana', x: 20 + Math.random() * (this.width - 40), y: -20, vy: 2.0 + Math.random() * 1.8, points: 5, radius: 24 };
+            item = { kind: 'banana', x: 20 + Math.random() * (this.width - 40), y: -20, vy: 2.0 + Math.random() * 1.8, points: 5, radius: 48 };
           }
           this.items.push(item);
           this.spawnTimer = 460 + Math.random() * 240;
