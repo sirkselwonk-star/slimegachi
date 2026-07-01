@@ -100,6 +100,7 @@
   color: var(--slimegachi-text);
   letter-spacing: 2px;
   flex: 0 0 auto;
+  margin-right: auto;  /* push coins/sound/music/back into a right-hand cluster */
 }
 .slimegachi-root .slimegachi-brand-accent {
   color: var(--slimegachi-accent);
@@ -108,7 +109,6 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  margin-left: auto;
   padding: 4px 2px;
   font-size: 12px;
   font-weight: 400;
@@ -335,11 +335,6 @@
 .slimegachi-root .slimegachi-petheader .slimegachi-coins {
   margin-left: 0;
   margin-top: 6px;
-}
-/* With the coins out of the topbar on the care screen, keep the sound/music
-   controls pinned to the right. */
-.slimegachi-root.slimegachi-care .slimegachi-sound-btn:not(.slimegachi-music-btn) {
-  margin-left: auto;
 }
 
 /* Pet image in care screen */
@@ -641,25 +636,31 @@
 .slimegachi-root .slimegachi-shelf-btn-ico { font-size: 15px; }
 
 /* Back button */
+/* Back button sits inline in the topbar, on the same row as the sound/music
+   toggles (matches their size + treatment). */
 .slimegachi-root .slimegachi-back {
-  position: absolute;
-  top: 48px;
-  right: 14px;
-  z-index: 6;
-  background: rgba(255, 255, 255, 0.06);
+  flex: none;
+  margin-left: 8px;
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 50%;
-  width: 38px;
-  height: 38px;
+  border-radius: 10px;
+  width: 30px;
+  height: 30px;
   display: none;
   align-items: center;
   justify-content: center;
   color: var(--slimegachi-text);
-  font-size: 18px;
+  font-size: 17px;
+  line-height: 1;
+  padding: 0;
   cursor: pointer;
   font-family: inherit;
 }
 .slimegachi-root .slimegachi-back.slimegachi-show { display: flex; }
+.slimegachi-root .slimegachi-back:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--slimegachi-accent);
+}
 .slimegachi-root .slimegachi-back:active { transform: scale(0.92); }
 
 /* Action feedback floaters */
