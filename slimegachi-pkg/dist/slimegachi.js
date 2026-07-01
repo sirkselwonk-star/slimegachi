@@ -1509,7 +1509,7 @@
       if (p.sick) moodLabel = 'Sick';
       else if (sleeping) moodLabel = 'Sleeping';
       else moodLabel = ({ happy: 'Thriving', okay: 'Content', sad: 'Needs Attention', sleepy: 'Sleepy' })[currentMood(p.stats)] || '';
-      $('petmood').textContent = moodLabel;
+      $('petmood').textContent = moodLabel ? 'STATUS: ' + moodLabel : '';
       /* Level badge with progress dots */
       const lvlEl = $('petlevel');
       if (lvlEl) {
