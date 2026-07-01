@@ -2032,6 +2032,7 @@
         this.width = r.width; this.height = r.height;
         this.bubbles = []; this.score = 0; this.spawnTimer = 0;
         this.startedAt = performance.now();
+        this._last = 0;
         this.active = true;
         $('minigame-score').textContent = '0';
         $('minigame-title').textContent = 'Bubble Pop';
@@ -2104,7 +2105,14 @@
         const remaining = Math.max(0, this.duration - elapsed);
         $('minigame-timer').textContent = '0:' + Math.ceil(remaining / 1000).toString().padStart(2, '0');
         if (remaining <= 0) { this.stop(false); return; }
-        this.spawnTimer -= 16;
+        /* Delta-time factor (normalised to 60fps) so speed is frame-rate
+           independent — keeps the game running at the same real-world pace on
+           low-fps mobile devices. Clamped to skip huge gaps (backgrounding). */
+        let dt = this._last ? (tNow - this._last) : 16;
+        this._last = tNow;
+        if (dt > 100) dt = 100;
+        const f = dt / 16.667;
+        this.spawnTimer -= dt;
         if (this.spawnTimer <= 0) {
           const rare = Math.random() < 0.15;
           const huge = Math.random() < 0.05;
@@ -2128,9 +2136,9 @@
         ctx.fillRect(0, 0, this.width, this.height);
         for (let i = this.bubbles.length - 1; i >= 0; i--) {
           const b = this.bubbles[i];
-          b.x += b.vx; b.y += b.vy;
+          b.x += b.vx * f; b.y += b.vy * f;
           if (b.particle) {
-            b.life -= 0.05;
+            b.life -= 0.05 * f;
             if (b.life <= 0) { this.bubbles.splice(i, 1); continue; }
             ctx.globalAlpha = b.life;
             ctx.fillStyle = b.color;
@@ -2181,6 +2189,7 @@
         this.basketY = r.height - 60;
         this.items = []; this.score = 0; this.spawnTimer = 0;
         this.startedAt = performance.now();
+        this._last = 0;
         this.active = true;
         $('minigame-score').textContent = '0';
         $('minigame-title').textContent = 'Banana Catch';
@@ -2258,9 +2267,16 @@
         const remaining = Math.max(0, this.duration - elapsed);
         $('minigame-timer').textContent = '0:' + Math.ceil(remaining / 1000).toString().padStart(2, '0');
         if (remaining <= 0) { this.stop(false); return; }
+        /* Delta-time factor (normalised to 60fps) so speed is frame-rate
+           independent — keeps the game running at the same real-world pace on
+           low-fps mobile devices. Clamped to skip huge gaps (backgrounding). */
+        let dt = this._last ? (tNow - this._last) : 16;
+        this._last = tNow;
+        if (dt > 100) dt = 100;
+        const f = dt / 16.667;
 
         /* Spawn items: 80% banana, 15% rotten (penalty), 5% golden */
-        this.spawnTimer -= 16;
+        this.spawnTimer -= dt;
         if (this.spawnTimer <= 0) {
           const roll = Math.random();
           let item;
@@ -2285,7 +2301,7 @@
 
         for (let i = this.items.length - 1; i >= 0; i--) {
           const it = this.items[i];
-          it.y += it.vy;
+          it.y += it.vy * f;
           const basketTop = this.basketY;
           if (it.y >= basketTop && it.y <= basketTop + 30 && it.x >= this.basketX && it.x <= this.basketX + this.basketW) {
             this.score += it.points;
