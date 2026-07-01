@@ -642,12 +642,24 @@
 
 /* Shelf actions */
 .slimegachi-root .slimegachi-shelf-actions {
-  /* Docked HUD bar: full-width gradient backdrop, flush to the bottom edge.
-     Negative margins break it out of the shelf's 20px side/bottom padding so
-     the backdrop runs edge-to-edge like the care screen's action bar. */
+  /* Docked HUD bar flush to the bottom edge. Negative margins break it out of
+     the shelf's 20px side/bottom padding so the scrim runs edge-to-edge. */
   margin: 0 -20px -20px;
   padding: 12px 20px 18px;
-  background: linear-gradient(to top, rgba(26, 20, 40, 0.95) 55%, transparent);
+  position: relative;
+}
+/* Dark scrim behind the shelf action buttons, matching the care screen's
+   bottom bar — covers the buttons and fades out just above them. */
+.slimegachi-root .slimegachi-shelf-actions::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: -22px;
+  background: linear-gradient(to top, rgba(26, 20, 40, 0.95) 82%, transparent);
+  z-index: -1;
+  pointer-events: none;
 }
 .slimegachi-root .slimegachi-shelf-actions-inner {
   display: flex;
