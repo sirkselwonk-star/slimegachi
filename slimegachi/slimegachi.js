@@ -936,6 +936,7 @@
               lastTick: p.lastTick,
               sick: p.sick,
               care_count: p.care_count,
+              awakeUntil: p.awakeUntil || 0,
               name: p.name
             });
           }
@@ -996,6 +997,25 @@
       if (s < e) return h >= s && h < e;
       return h >= s || h < e;
     }
+    /* Whether a specific pet is asleep — the time-of-day schedule, unless it was
+       tapped awake (see wakePet), which overrides until its next bedtime. Use
+       this per-pet form everywhere instead of the raw schedule. */
+    function petSleeping(p) {
+      if (!p || !p.pet) return false;
+      if (p.awakeUntil && now() < p.awakeUntil) return false;
+      return isPetSleeping(p.pet);
+    }
+    /* Tap-to-wake: keep the pet awake until the next time it would head to bed
+       (the next occurrence of its sleep-window start hour). */
+    function wakePet(p) {
+      const def = p && PET_DEFS[p.pet];
+      if (!def || !def.sleepWindow) return;
+      const startHour = def.sleepWindow[0];
+      const d = new Date(now());
+      const next = new Date(d.getFullYear(), d.getMonth(), d.getDate(), startHour, 0, 0, 0);
+      if (next.getTime() <= d.getTime()) next.setDate(next.getDate() + 1);
+      p.awakeUntil = next.getTime();
+    }
     function timePhase() {
       const h = gameHour();
       if (h >= 6  && h < 8)  return 'dawn';
@@ -1050,7 +1070,8 @@
           name: owned.name, pet: owned.pet, serial: owned.serial,
           traits: owned.traits || {},
           sick: (rec && rec.sick) || false,
-          care_count: (rec && rec.care_count) || 0
+          care_count: (rec && rec.care_count) || 0,
+          awakeUntil: (rec && rec.awakeUntil) || 0
         };
       } else {
         State.pets[k].name = owned.name;
@@ -1105,7 +1126,7 @@
       if (action === 'feed') { openFeedModal(); return; }
       if (action === 'play') { launchMiniGame(); return; }
 
-      const sleeping = isPetSleeping(p.pet);
+      const sleeping = petSleeping(p);
       let multiplier = 1.0;
       let suffix = '';
       if (action === 'sleep' && sleeping)        { multiplier = SLEEP_BONUS_MULT; suffix = ' (bonus!)'; }
@@ -1154,7 +1175,7 @@
       const def = PET_DEFS[p.pet];
       const isFav = def.favoriteFood === foodId;
       const mult = isFav ? 1.5 : 1.0;
-      const sleeping = isPetSleeping(p.pet);
+      const sleeping = petSleeping(p);
       const timeMult = sleeping ? WRONG_TIME_PENALTY : 1.0;
       if (food.healsSick) p.sick = false;
       if (food.isToy) {
@@ -1256,7 +1277,7 @@
       if (State.view !== 'care') return;
       const p = activePet();
       if (!p) return;
-      const sleeping = isPetSleeping(p.pet);
+      const sleeping = petSleeping(p);
       const mood = sleeping ? 'sleepy' : currentMood(p.stats);
       const lines = (SPEECH[p.pet] && SPEECH[p.pet][mood]) || [];
       if (lines.length === 0) { scheduleNextBubble(); return; }
@@ -1390,7 +1411,7 @@
       const p = activePet();
       if (!p) return;
       const def = PET_DEFS[p.pet];
-      const sleeping = isPetSleeping(p.pet);
+      const sleeping = petSleeping(p);
       const t = (performance.now() - petAnim.startTime) / 1000;
       const breathRate = sleeping ? 1.0 : 2.0;
       let bounce = 0;
@@ -1483,7 +1504,7 @@
         ring.style.setProperty('--col', v < 25 ? '#ff5577' : STAT_COLOR[stat]);
       }
       $('petname').textContent = p.name;
-      const sleeping = isPetSleeping(p.pet);
+      const sleeping = petSleeping(p);
       let moodLabel;
       if (p.sick) moodLabel = 'Sick';
       else if (sleeping) moodLabel = 'Sleeping';
@@ -1667,7 +1688,7 @@
       const wrapper = $('petimg');
       if (!wrapper) return;
       const p = activePet();
-      const sleeping = isPetSleeping(p.pet);
+      const sleeping = petSleeping(p);
 
       /* --- Mouth --- */
       const mouth = wrapper.querySelector('.sg-mouth');
@@ -1712,7 +1733,7 @@
       lastEmoteCheck = tNow;
       const p = activePet();
       if (!p) return;
-      const sleeping = isPetSleeping(p.pet);
+      const sleeping = petSleeping(p);
       if (sleeping || p.sick) return;
       if (happyBob.startTime && tNow - happyBob.startTime > 5000) {
         /* Been happy for 5s+ — small chance to spawn musical note */
@@ -1726,7 +1747,7 @@
       const p = activePet();
       if (!p) return;
       /* Sleeping pets stay closed; sick pets blink slowly; happy pets normally */
-      const sleeping = isPetSleeping(p.pet);
+      const sleeping = petSleeping(p);
       if (sleeping || (p.stats.energy < 15)) {
         setEyesClosed(true);
         blinkTimer = setTimeout(scheduleBlink, 4000);
@@ -2640,6 +2661,16 @@
     $('music-toggle').addEventListener('click', () => { Music.toggle(); renderMusicBtn(); });
     renderMusicBtn();
 
+    /* Tap a sleeping pet to wake it (stays up until its next bedtime). */
+    $('petimg').addEventListener('click', () => {
+      const p = activePet();
+      if (State.view !== 'care' || !p || !petSleeping(p)) return;
+      wakePet(p);
+      spawnActionFeedback('*yawn*', false);
+      renderStats();
+      scheduleNextBubble();
+      persist();
+    });
     $('back').addEventListener('click', backToShelf);
     $('open-shop').addEventListener('click', openShopModal);
     $('open-achievements').addEventListener('click', openAchievementsModal);
