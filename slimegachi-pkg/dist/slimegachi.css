@@ -375,10 +375,15 @@
   letter-spacing: 2px;
   vertical-align: middle;
 }
-/* Coin count relocated into the care-screen info column, under the level. */
+/* Coin count relocated into the care-screen info column, under the level.
+   A dark drop shadow keeps the yellow readable over bright daytime skies. */
 .slimegachi-root .slimegachi-petheader .slimegachi-coins {
   margin-left: 0;
   margin-top: 6px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
+}
+.slimegachi-root .slimegachi-petheader .slimegachi-coins svg.slimegachi-ico {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
 }
 
 /* Pet image in care screen */
