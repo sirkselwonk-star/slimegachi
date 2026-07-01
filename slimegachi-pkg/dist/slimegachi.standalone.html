@@ -111,7 +111,7 @@ body{display:flex;align-items:center;justify-content:center;}
 .slimegachi-root .slimegachi-topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 8px 16px 6px;
   font-size: 13px;
   letter-spacing: 1px;
@@ -135,6 +135,7 @@ body{display:flex;align-items:center;justify-content:center;}
   display: flex;
   align-items: center;
   gap: 5px;
+  margin-left: auto;
   padding: 4px 2px;
   font-size: 12px;
   font-weight: 700;
@@ -169,16 +170,18 @@ body{display:flex;align-items:center;justify-content:center;}
 }
 .slimegachi-root .slimegachi-sound-btn.slimegachi-muted { opacity: 0.5; }
 .slimegachi-root .slimegachi-music-btn { font-size: 13px; margin-left: 6px; }
+/* Small status/mode badge tucked under the SLIMEgachi wordmark (e.g. "DEMO"). */
 .slimegachi-root .slimegachi-acct {
-  font-size: 10px;
-  color: var(--slimegachi-dim);
+  position: absolute;
+  top: 29px;
+  left: 16px;
+  font-size: 8px;
+  letter-spacing: 3px;
+  color: var(--slimegachi-accent);
   font-family: var(--slimegachi-font-ui);
-  text-align: right;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  text-align: left;
   white-space: nowrap;
-  flex: 1;
-  min-width: 0;
+  z-index: 6;
 }
 
 /* Stage (main play area) */
@@ -3824,7 +3827,7 @@ body{display:flex;align-items:center;justify-content:center;}
     /* ----- Load account flow ----- */
     async function loadAccount(accountId) {
       State.account = accountId;
-      $('acct').textContent = accountId ? (accountId + (State.stubMode ? ' (demo)' : '')) : '— not connected —';
+      $('acct').textContent = State.stubMode ? 'demo' : (accountId || '— not connected —');
       const devMode = $('dev-mode');
       if (devMode) devMode.textContent = State.stubMode ? 'demo' : 'mirror';
       setStatus(!State.stubMode && accountId ? 'Loading from mirror node…' : null, 'info');

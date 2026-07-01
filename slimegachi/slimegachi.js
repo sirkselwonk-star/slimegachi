@@ -2540,7 +2540,7 @@
     /* ----- Load account flow ----- */
     async function loadAccount(accountId) {
       State.account = accountId;
-      $('acct').textContent = accountId ? (accountId + (State.stubMode ? ' (demo)' : '')) : '— not connected —';
+      $('acct').textContent = State.stubMode ? 'demo' : (accountId || '— not connected —');
       const devMode = $('dev-mode');
       if (devMode) devMode.textContent = State.stubMode ? 'demo' : 'mirror';
       setStatus(!State.stubMode && accountId ? 'Loading from mirror node…' : null, 'info');
