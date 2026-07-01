@@ -2270,11 +2270,11 @@
           const roll = Math.random();
           let item;
           if (roll < 0.05) {
-            item = { kind: 'golden', x: 20 + Math.random() * (this.width - 40), y: -20, vy: 2.5 + Math.random() * 1.0, points: 15, radius: 18 };
+            item = { kind: 'golden', x: 20 + Math.random() * (this.width - 40), y: -20, vy: 2.5 + Math.random() * 1.0, points: 15, radius: 24 };
           } else if (roll < 0.20) {
             item = { kind: 'rotten', x: 20 + Math.random() * (this.width - 40), y: -20, vy: 3.0 + Math.random() * 1.5, points: -8, radius: 16 };
           } else {
-            item = { kind: 'banana', x: 20 + Math.random() * (this.width - 40), y: -20, vy: 2.0 + Math.random() * 1.8, points: 5, radius: 18 };
+            item = { kind: 'banana', x: 20 + Math.random() * (this.width - 40), y: -20, vy: 2.0 + Math.random() * 1.8, points: 5, radius: 24 };
           }
           this.items.push(item);
           this.spawnTimer = 460 + Math.random() * 240;
