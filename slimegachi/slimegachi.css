@@ -337,16 +337,16 @@
   text-transform: uppercase;
   letter-spacing: 2px;
   margin-top: 4px;
-  text-shadow: var(--slimegachi-hud-shadow-sm);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
   opacity: 0.9;
 }
 .slimegachi-root .slimegachi-petlevel {
   font-size: 14px;
-  color: var(--slimegachi-hud-level);
+  color: var(--slimegachi-accent);
   letter-spacing: 1px;
   margin-top: 4px;
   font-family: var(--slimegachi-font-display);
-  text-shadow: var(--slimegachi-hud-shadow-sm);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
   opacity: 0.85;
 }
 .slimegachi-root .slimegachi-petlevel:empty { display: none; }
