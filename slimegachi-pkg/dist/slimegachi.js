@@ -2116,7 +2116,7 @@
         let dt = this._last ? (tNow - this._last) : 16;
         this._last = tNow;
         if (dt > 100) dt = 100;
-        dt *= 2;  /* 2x game speed (scales both fall speed and spawn cadence) */
+        dt *= 4;  /* 4x game speed (scales both fall speed and spawn cadence) */
         const f = dt / 16.667;
         this.spawnTimer -= dt;
         if (this.spawnTimer <= 0) {
@@ -2279,7 +2279,7 @@
         let dt = this._last ? (tNow - this._last) : 16;
         this._last = tNow;
         if (dt > 100) dt = 100;
-        dt *= 2;  /* 2x game speed (scales both fall speed and spawn cadence) */
+        dt *= 4;  /* 4x game speed (scales both fall speed and spawn cadence) */
         const f = dt / 16.667;
 
         /* Spawn items: 80% banana, 15% rotten (penalty), 5% golden */
