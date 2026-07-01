@@ -342,7 +342,7 @@ body{display:flex;align-items:center;justify-content:center;}
   opacity: 0.9;
 }
 .slimegachi-root .slimegachi-petlevel {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--slimegachi-hud-level);
   letter-spacing: 1px;
   margin-top: 4px;
@@ -351,6 +351,16 @@ body{display:flex;align-items:center;justify-content:center;}
   opacity: 0.85;
 }
 .slimegachi-root .slimegachi-petlevel:empty { display: none; }
+/* Coin count relocated into the care-screen info column, under the level. */
+.slimegachi-root .slimegachi-petheader .slimegachi-coins {
+  margin-left: 0;
+  margin-top: 6px;
+}
+/* With the coins out of the topbar on the care screen, keep the sound/music
+   controls pinned to the right. */
+.slimegachi-root.slimegachi-care .slimegachi-sound-btn:not(.slimegachi-music-btn) {
+  margin-left: auto;
+}
 
 /* Pet image in care screen */
 .slimegachi-root .slimegachi-carestage {
@@ -2867,6 +2877,10 @@ body{display:flex;align-items:center;justify-content:center;}
       $('floor').classList.add('slimegachi-show');
       $('bottombar').classList.add('slimegachi-show');
       $('back').classList.add('slimegachi-show');
+      /* On the care screen the coin count lives in the info column, under the
+         level; on the shelf it sits in the topbar (see backToShelf). */
+      container.classList.add('slimegachi-care');
+      $('petheader').appendChild(container.querySelector('.slimegachi-coins'));
       petAnim.startTime = performance.now();
       petAnim.action = null;
       applyDecay();
@@ -2889,6 +2903,11 @@ body{display:flex;align-items:center;justify-content:center;}
       $('floor').classList.remove('slimegachi-show');
       $('bottombar').classList.remove('slimegachi-show');
       $('back').classList.remove('slimegachi-show');
+      /* Return the coin count to the topbar (before the sound button). */
+      container.classList.remove('slimegachi-care');
+      const coinsEl = container.querySelector('.slimegachi-coins');
+      const soundBtn = container.querySelector('.slimegachi-sound-btn');
+      soundBtn.parentElement.insertBefore(coinsEl, soundBtn);
       const img = $('petimg');
       img.classList.remove('slimegachi-sleeping', 'slimegachi-sad', 'slimegachi-happy', 'slimegachi-sick');
       if (bubbleTimer) clearTimeout(bubbleTimer);

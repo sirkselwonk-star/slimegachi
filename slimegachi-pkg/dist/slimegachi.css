@@ -332,7 +332,7 @@
   opacity: 0.9;
 }
 .slimegachi-root .slimegachi-petlevel {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--slimegachi-hud-level);
   letter-spacing: 1px;
   margin-top: 4px;
@@ -341,6 +341,16 @@
   opacity: 0.85;
 }
 .slimegachi-root .slimegachi-petlevel:empty { display: none; }
+/* Coin count relocated into the care-screen info column, under the level. */
+.slimegachi-root .slimegachi-petheader .slimegachi-coins {
+  margin-left: 0;
+  margin-top: 6px;
+}
+/* With the coins out of the topbar on the care screen, keep the sound/music
+   controls pinned to the right. */
+.slimegachi-root.slimegachi-care .slimegachi-sound-btn:not(.slimegachi-music-btn) {
+  margin-left: auto;
+}
 
 /* Pet image in care screen */
 .slimegachi-root .slimegachi-carestage {

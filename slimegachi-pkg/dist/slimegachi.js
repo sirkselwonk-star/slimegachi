@@ -1580,6 +1580,10 @@
       $('floor').classList.add('slimegachi-show');
       $('bottombar').classList.add('slimegachi-show');
       $('back').classList.add('slimegachi-show');
+      /* On the care screen the coin count lives in the info column, under the
+         level; on the shelf it sits in the topbar (see backToShelf). */
+      container.classList.add('slimegachi-care');
+      $('petheader').appendChild(container.querySelector('.slimegachi-coins'));
       petAnim.startTime = performance.now();
       petAnim.action = null;
       applyDecay();
@@ -1602,6 +1606,11 @@
       $('floor').classList.remove('slimegachi-show');
       $('bottombar').classList.remove('slimegachi-show');
       $('back').classList.remove('slimegachi-show');
+      /* Return the coin count to the topbar (before the sound button). */
+      container.classList.remove('slimegachi-care');
+      const coinsEl = container.querySelector('.slimegachi-coins');
+      const soundBtn = container.querySelector('.slimegachi-sound-btn');
+      soundBtn.parentElement.insertBefore(coinsEl, soundBtn);
       const img = $('petimg');
       img.classList.remove('slimegachi-sleeping', 'slimegachi-sad', 'slimegachi-happy', 'slimegachi-sick');
       if (bubbleTimer) clearTimeout(bubbleTimer);
