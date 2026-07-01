@@ -341,6 +341,13 @@
   opacity: 0.85;
 }
 .slimegachi-root .slimegachi-petlevel:empty { display: none; }
+/* Shrink the ● / ○ progress dots so the level line reads the same size as the
+   coin count; the raw glyphs render ~1.5x the text height otherwise. */
+.slimegachi-root .slimegachi-lvl-dots {
+  font-size: 0.66em;
+  letter-spacing: 2px;
+  vertical-align: middle;
+}
 /* Coin count relocated into the care-screen info column, under the level. */
 .slimegachi-root .slimegachi-petheader .slimegachi-coins {
   margin-left: 0;

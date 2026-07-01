@@ -1498,7 +1498,7 @@
           /* 5-dot progress indicator. Round up so any progress shows >=1 dot. */
           const raw = prog.frac * 5;
           const filled = raw > 0 && raw < 1 ? 1 : Math.round(raw);
-          badge += ' ' + '●'.repeat(filled) + '○'.repeat(5 - filled);
+          badge += ' <span class="slimegachi-lvl-dots">' + '●'.repeat(filled) + '○'.repeat(5 - filled) + '</span>';
         } else {
           badge += ' ' + ACH_ICONS.star + ' MAX';
         }
