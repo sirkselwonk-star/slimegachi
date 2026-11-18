@@ -59,7 +59,7 @@ Then **bump the cache buster** in `index.html` — increment `?v=N` on the chang
 
 `node --check slimegachi-pkg/dist/slimegachi.js` is a quick syntax gate before deploying.
 
-**Fonts:** `dist/slimegachi.css` embeds White Rabbit + JetBrains Mono as base64. The `slimegachi/slimegachi.css` currently deployed is the un-embedded `src` version, with `index.html` loading both fonts from CDN links instead. Copying the `dist` CSS as above makes the page self-contained (the CDN `<link>` tags then become redundant).
+**Fonts:** `dist/slimegachi.css` embeds White Rabbit + JetBrains Mono as base64, so the deployed page makes no external font requests. Always copy the `dist` CSS (not `src`) into `slimegachi/`.
 
 ---
 

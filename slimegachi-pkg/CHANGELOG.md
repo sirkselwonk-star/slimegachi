@@ -1,8 +1,8 @@
 # Changelog
 
-## Unreleased — demo polish (since 1.8.0)
+## 1.9.0 — demo polish
 
-Everything below landed after 1.8.0 was cut. `SLIMEgachi.version` still reads `'1.8.0'`; bump it when this is released. No changes to the mount API, options, or public events.
+Gameplay fairness fixes, a custom icon system and a long UI polish pass. No changes to the mount API, options, or public events.
 
 ### Gameplay
 
@@ -35,6 +35,7 @@ Everything below landed after 1.8.0 was cut. `SLIMEgachi.version` still reads `'
 
 ### Demo page / packaging
 
+- **Deployed page is self-contained for fonts**: `slimegachi/slimegachi.css` is now the `dist` build with White Rabbit + JetBrains Mono embedded, and `index.html` no longer loads them from Google Fonts / cdnfonts.
 - **`?reset=1`**: loading `index.html` or `dist/slimegachi.standalone.html` with `?reset=1` wipes the `slimegachi*` localStorage keys before mount and then strips the parameter from the URL, giving any device a clean Level-0 start.
 
 ## 1.8.0 — care-screen layout pass

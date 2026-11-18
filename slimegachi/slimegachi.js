@@ -2814,7 +2814,7 @@
 
   /* Public namespace */
   global.SLIMEgachi = {
-    version: '1.8.0',
+    version: '1.9.0',
     mount(container, options) {
       if (!container) throw new Error('SLIMEgachi.mount: container is required');
       return createInstance(container, options || {});
