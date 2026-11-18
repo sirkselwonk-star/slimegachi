@@ -2,7 +2,7 @@
 
 The deployable home of **Slimegachi**, a Tamagotchi-style virtual-pet game for the SLIME NFT collection on Hedera. (Filesystem name is `SLIME.PETS`; the product name is Slimegachi.) Part of the SLIME family of projects.
 
-`index.html` mounts the packaged Slimegachi widget — a zero-dependency, vanilla-JS game. Open it, click once (to unlock audio), and play: Kitten + Monkey are playable in demo mode; Owl + Dragon are locked mint-2 teasers.
+`index.html` mounts the packaged Slimegachi widget — a zero-runtime-dependency game written in TypeScript. Open it, click once (to unlock audio), and play: Kitten + Monkey are playable in demo mode; Owl + Dragon are locked mint-2 teasers.
 
 ---
 
@@ -14,12 +14,12 @@ slimegachi/             ← DEPLOYED build (what index.html actually serves)
   slimegachi.js         ←   copied from slimegachi-pkg/dist/
   slimegachi.css
 slimegachi-pkg/         ← SOURCE-OF-TRUTH package (edit here)
-  src/                  ←   slimegachi.js + slimegachi.css  ← edit these
-  dist/                 ←   build output (generated)
+  src/                  ←   TypeScript modules (entry: index.ts) + slimegachi.css  ← edit these
+  dist/                 ←   build output (generated): script, ES module, types, CSS, standalone demo
   assets/pet-art/       ←   pet SVGs inlined into the build (kitten/monkey/owl/dragon)
   docs/                 ←   GAME_DESIGN.md, ADDING_A_PET.md
   examples/             ←   integration patterns (minimal / wallet / backend / react)
-  scripts/build.js      ←   the build
+  scripts/              ←   build.js (bundle), smoke.js (browser test), sync-deploy.js (copy + cache-bust)
   README.md             ←   widget integration contract (mount API, options, events)
   CHANGELOG.md
 Pet 1–4.svg / .png      ← canonical hand-drawn 2D pets (originals); _convert.py makes PNGs
@@ -45,21 +45,30 @@ Progress persists in the browser's `localStorage`. Load the page with `?reset=1`
 
 ## Make a change → ship it
 
-The source lives in `slimegachi-pkg/src/`. After editing:
+The source lives in `slimegachi-pkg/src/` (TypeScript + one CSS file). One-time setup:
 
 ```sh
 cd slimegachi-pkg
-node scripts/build.js          # inlines pet-art SVGs → dist/  (+ standalone demo)
-cd ..
-cp slimegachi-pkg/dist/slimegachi.js  slimegachi/slimegachi.js
-cp slimegachi-pkg/dist/slimegachi.css slimegachi/slimegachi.css
+npm install
+npx playwright install chromium    # browser for the smoke test
 ```
 
-Then **bump the cache buster** in `index.html` — increment `?v=N` on the changed `<link>`/`<script>` tag(s). GitHub Pages serves stale modules otherwise. (Bump only what changed: CSS-only edit → bump the CSS tag.)
+After editing:
 
-`node --check slimegachi-pkg/dist/slimegachi.js` is a quick syntax gate before deploying.
+```sh
+npm run release
+```
 
-**Fonts:** `dist/slimegachi.css` embeds White Rabbit + JetBrains Mono as base64, so the deployed page makes no external font requests. Always copy the `dist` CSS (not `src`) into `slimegachi/`.
+That runs, in order, and stops at the first failure:
+
+1. `npm run typecheck` — `tsc` in strict mode.
+2. `npm run build` — bundles `src/` into `dist/` (pet art and fonts embedded).
+3. `npm run smoke` — drives the built demo in headless Chromium and checks the shelf, care screen, vitals rings, eye layers, care actions, leveling, both mini-games, every modal, persistence and sleep / tap-to-wake.
+4. `scripts/sync-deploy.js` — copies `dist/slimegachi.js` and `dist/slimegachi.css` into `slimegachi/` and bumps the `?v=N` cache buster in `index.html` for each file that changed (GitHub Pages serves stale copies otherwise).
+
+Then commit and push. `npm test` runs steps 1–3 without touching the deployed copy; `npm run smoke -- --full` also plays a mini-game through its whole 30-second round.
+
+**Fonts:** `dist/slimegachi.css` embeds White Rabbit + JetBrains Mono as base64, so the deployed page makes no external font requests.
 
 ---
 

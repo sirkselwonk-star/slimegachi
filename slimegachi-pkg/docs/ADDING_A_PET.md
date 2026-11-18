@@ -207,7 +207,7 @@ The closed-eye render will still show pupils on top of the lashes (because of ho
 
 ## Step 4: Add or update the `PET_DEFS` entry
 
-In `src/slimegachi.js`, find the `PET_DEFS` block and add/update the entry.
+In `src/data.ts`, find the `PET_DEFS` block and add/update the entry. For a brand-new pet, first add its id to the `PetId` type in `src/types.ts` — the compiler will then point at every table that needs an entry (`PET_DEFS`, `SPEECH`, the music themes are keyed by string and fall back to Kitten's).
 
 ### Schema
 
@@ -250,7 +250,7 @@ PetName: {
 
 ## Step 5: Add speech bubble lines
 
-In `src/slimegachi.js`, find the `SPEECH` block and add a new top-level entry keyed by the pet's `id`. Four mood pools each, 4-5 lines per pool.
+In `src/data.ts`, find the `SPEECH` block and add a new top-level entry keyed by the pet's `id`. Four mood pools each, 4-5 lines per pool.
 
 ```js
 PetName: {
@@ -281,46 +281,49 @@ For Owl or Dragon, just change `status: 'locked'` to `status: 'available'` in th
 
 If the pet's `favoriteGame` is a new game ID, you need to actually build the game.
 
-Pattern: each mini-game is a module with `start()`, `stop(forfeit)`, and `loop()` methods. See `BubblePop` and `BananaCatch` in `src/slimegachi.js` as templates.
+Mini-games live in `src/minigames.ts`. Each is a factory that takes a `GameHost` and returns a `MiniGame` (`id`, `start()`, `stop(forfeit)`). See `createBubblePop` and `createBananaCatch` as templates. A game only handles input, drawing and its score; rewards are applied by the instance, so every game pays out by the same formula.
 
-The skeleton:
+1. Add the id to the `GameId` type in `src/types.ts`.
+2. Write the factory:
 
-```js
-const NewGame = {
-  active: false, items: [], score: 0, startedAt: 0, duration: 30000,
-  rafId: null, ctx: null, canvas: null, width: 0, height: 0, _handler: null,
+```ts
+export function createHootMatch(host: GameHost): MiniGame {
+  let active = false, score = 0, rafId: number | null = null;
+  let surface: Surface | null = null;
+  const clock = createClock(host);          // 30s round timer + frame-rate independent dt
 
-  start() {
-    // Set up canvas, register input handlers, $('minigame-title').textContent = 'Game Name'
-    // Initial state, then this.loop()
-  },
-  stop(forfeit) {
-    // Clean up handlers, compute rewards via the standard formula:
-    //   happy = min(35, max(forfeit ? 5 : 10, floor(score * 0.4)))
-    //   coins = floor(score * 0.25 * (State.toyBuff ? 1.5 : 1.0))
-    // Apply favBonus 1.5× to happy if pet's favoriteGame matches your ID
-    // Emit: safeEmit('onMiniGameComplete', {...}); emitInternal('minigame_complete', {...});
-    // Show the result screen
-  },
-  loop() {
-    // Per-frame: update items, draw, requestAnimationFrame(this.loop)
-    // Check `remaining <= 0` and call this.stop(false) when time runs out
+  function loop() {
+    if (!active || !surface) return;
+    const dt = clock.tick();                 // null once the 30 seconds are up
+    if (dt === null) { game.stop(false); return; }
+    // update with dt (already scaled by GAME_SPEED), draw on surface.ctx,
+    // and keep the HUD current: host.$('minigame-score').textContent = String(score)
+    rafId = requestAnimationFrame(loop);
   }
-};
-```
 
-Register it in `pickGameForPet()`:
-
-```js
-function pickGameForPet(pet) {
-  const def = PET_DEFS[pet];
-  if (def && def.favoriteGame === 'bananacatch') return BananaCatch;
-  if (def && def.favoriteGame === 'hootmatch')  return HootMatch;   // <- new
-  return BubblePop;
+  const game: MiniGame = {
+    id: 'hootmatch',
+    start() {
+      surface = openSurface(host, 'Hoot Match');   // sizes the canvas, resets the HUD
+      score = 0; clock.start(); active = true;
+      // register input handlers on surface.canvas
+      loop();
+    },
+    stop(forfeit) {
+      active = false;
+      if (rafId) cancelAnimationFrame(rafId);
+      // remove input handlers
+      host.complete('hootmatch', score, forfeit);  // rewards, results panel, events
+    }
+  };
+  return game;
 }
 ```
 
-If the game has its own achievement (like "score 100+ in X"), add it to the `ACHIEVEMENTS` catalog and fire it from `stop()`.
+3. In `src/instance.ts`, create it next to the others (`const HootMatch = createHootMatch(gameHost);`), return it from `pickGameForPet()`, and add its badge to `GAME_MASTER_BADGE` (the "score 100+" achievement — add that to the `AchievementId` type and the `ACHIEVEMENTS` catalog in `src/data.ts`).
+4. Add a `minigame_hootmatch` theme to `THEMES` in `src/audio.ts`, or it plays Bubble Pop's music.
+
+`completeMiniGame()` in `src/instance.ts` applies the standard formula — `happy = min(35, max(forfeit ? 5 : 10, floor(score × 0.4)))` with a 1.5× favourite-game bonus, `coins = floor(score × 0.25)` with 1.5× for the Toy Ball — and emits `onMiniGameComplete` / `minigame_complete`.
 
 ---
 
@@ -348,10 +351,10 @@ The shop and feed modals pick this up automatically (they iterate FOODS).
 ## Step 9: Rebuild and test
 
 ```bash
-node scripts/build.js
+npm test
 ```
 
-This regenerates `dist/slimegachi.js` (with the new SVG base64-embedded), `dist/slimegachi.css`, and the standalone HTML.
+This type-checks, regenerates `dist/` (with the new SVG base64-embedded) and runs the smoke test. Add the new pet's art file name to the `PETS` list in `scripts/build.js` if it is a brand-new pet.
 
 Open the standalone HTML and verify:
 
@@ -405,11 +408,11 @@ For a brand-new pet (Scenario B), in order:
 - [ ] Add `PET_DEFS` entry with decay, favorites, sleep window, sky palettes
 - [ ] Append to `PET_ORDER`
 - [ ] Add `SPEECH` block with 4 mood-pool entries
-- [ ] (Optional) Add new mini-game with `start`/`stop`/`loop`
+- [ ] (Optional) Add new mini-game factory in `src/minigames.ts`
 - [ ] (Optional) Register the new game in `pickGameForPet`
 - [ ] (Optional) Add a new achievement for the new game
 - [ ] (Optional) Add a new food to `FOODS`
-- [ ] `node scripts/build.js`
+- [ ] `npm test` (typecheck + build + smoke test)
 - [ ] Open standalone HTML and verify everything works
 - [ ] Mint NFTs with `Head` trait matching the pet key
 

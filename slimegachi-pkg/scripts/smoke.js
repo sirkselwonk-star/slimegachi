@@ -7,8 +7,9 @@
  * the shelf, the care screen, vitals rings, eye layers, care actions, both
  * mini-games, every modal, persistence across a reload, and sleep / tap-to-wake.
  *
- * Usage:  node scripts/build.js && node scripts/smoke.js
+ * Usage:  node scripts/build.js && node scripts/smoke.js [--full]
  * Exits non-zero if any check fails. Needs the `playwright` package.
+ * --full also plays a mini-game through its whole 30-second round.
  *
  * The clock is pinned (Date only; timers run normally) so the day/night
  * schedule and stat decay are deterministic.
@@ -16,7 +17,8 @@
 const path = require('path');
 const { chromium } = require('playwright');
 
-const PAGE = 'file://' + path.resolve(__dirname, '..', 'dist', 'slimegachi.standalone.html');
+/* SMOKE_PAGE=<path> tests another build of the standalone demo. */
+const PAGE = 'file://' + path.resolve(process.env.SMOKE_PAGE || path.join(__dirname, '..', 'dist', 'slimegachi.standalone.html'));
 const NOON = new Date(2026, 5, 15, 12, 0, 0);
 const NIGHT = new Date(2026, 5, 15, 2, 0, 0);
 
@@ -203,12 +205,70 @@ async function nightChecks(browser, errors) {
   await page.context().close();
 }
 
+/* Leveling: only care that meets a genuine need earns progress. Uses the dev
+   panel's +1h button to make the pet hungry. */
+async function progressionChecks(browser, errors) {
+  console.log('Progression — fresh save');
+  const page = await openPage(browser, NOON, errors, true);
+  await openPet(page, 0);
+  for (let i = 0; i < 3; i++) await click(page, sg('dev-skip'));
+  await wait(page, 200);
+  const hungry = await activeStats(page);
+  check('+1h x3 makes the Kitten hungry (decay 14/h)', Math.round(hungry.stats.hunger) === 38, hungry.stats);
+  const feedOnce = async () => {
+    await click(page, '[data-action="feed"]');
+    await wait(page, 150);
+    await click(page, sg('feed-grid') + ' .slimegachi-shop-item');
+    await wait(page, 150);
+  };
+  await feedOnce();
+  let pet = await activeStats(page);
+  check('feeding a hungry pet earns care credit', pet.care_count === 1, pet.care_count);
+  check('Snack adds 20 hunger', Math.round(pet.stats.hunger) === 58, pet.stats);
+  await feedOnce();
+  pet = await activeStats(page);
+  check('second feed (hunger 58 < 60) also counts', pet.care_count === 2, pet.care_count);
+  await feedOnce();
+  pet = await activeStats(page);
+  check('third feed (hunger 78) earns no credit', pet.care_count === 2, pet.care_count);
+  const s = await state(page);
+  check('quests saw every feed', s.collection.totalActions === 3 && s.collection.foodsTried.snack === true, s.collection);
+  await page.context().close();
+}
+
+/* A whole 30-second Bubble Pop round, ended by the clock. */
+async function fullRoundChecks(browser, errors) {
+  console.log('Full mini-game round (30s)');
+  const page = await openPage(browser, NOON, errors, true);
+  await openPet(page, 0);
+  const coinsBefore = (await state(page)).coins;
+  await click(page, '[data-action="play"]');
+  const box = await (await page.$(sg('minigame-canvas'))).boundingBox();
+  const end = Date.now() + 31500;
+  let i = 0;
+  while (Date.now() < end && !(await hasClass(page, sg('miniresult'), 'slimegachi-show'))) {
+    await page.mouse.click(box.x + box.width * (0.1 + 0.8 * ((i * 0.37) % 1)), box.y + box.height * (0.15 + 0.7 * ((i * 0.61) % 1)));
+    i++;
+    await wait(page, 40);
+  }
+  await wait(page, 300);
+  check('round ends on its own after 30s', await hasClass(page, sg('miniresult'), 'slimegachi-show'));
+  const score = Number((await page.textContent(sg('miniresult-score'))).trim());
+  const s = await state(page);
+  check('score is a non-negative number', Number.isFinite(score) && score >= 0, score);
+  check('coins paid = floor(score * 0.25)', s.coins - coinsBefore === Math.floor(score * 0.25), [score, s.coins - coinsBefore]);
+  check('completed round is counted in the collection', s.collection.gamesPlayed.bubblepop === 1, s.collection.gamesPlayed);
+  await page.context().close();
+}
+
 (async () => {
   const browser = await chromium.launch();
   const errors = [];
   try {
     await dayChecks(browser, errors);
     await nightChecks(browser, errors);
+    await progressionChecks(browser, errors);
+    if (process.argv.includes('--full')) await fullRoundChecks(browser, errors);
   } catch (e) {
     failures++;
     console.log('  FAIL  test run threw: ' + (e && e.stack || e));

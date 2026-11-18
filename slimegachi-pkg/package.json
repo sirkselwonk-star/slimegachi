@@ -1,0 +1,21 @@
+{
+  "name": "slimegachi",
+  "version": "1.10.0",
+  "private": true,
+  "description": "SLIMEgachi \u2014 a Tamagotchi-style virtual-pet widget for the SLIME NFT collection on Hedera.",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "node scripts/build.js",
+    "smoke": "node scripts/smoke.js",
+    "test": "npm run typecheck && npm run build && npm run smoke",
+    "release": "npm test && node scripts/sync-deploy.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "playwright": "^1.63.0",
+    "typescript": "^7.0.2"
+  },
+  "types": "dist/types/index.d.ts",
+  "module": "dist/slimegachi.esm.js",
+  "main": "dist/slimegachi.js"
+}

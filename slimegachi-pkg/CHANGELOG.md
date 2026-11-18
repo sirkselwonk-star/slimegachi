@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.10.0 — TypeScript
+
+The widget is now written in TypeScript. Gameplay, markup, styles, storage and the public API are unchanged; the old and new builds pass the same browser test suite.
+
+- **Source split into typed modules**: the single 2,800-line `src/slimegachi.js` is replaced by `src/*.ts` — `index` (entry), `types`, `instance`, `minigames`, `data`, `quests`, `leveling`, `audio`, `icons`, `template`, `hedera`, `storage`, `pet-art`, `util`. Compiled with `strict` on and no `any`.
+- **Typed public contract**: `MountOptions`, `StorageAdapter`, `GetOwnedPets`, `OwnedPet`, `EventHooks` / `EventPayloads`, `StateSnapshot` and `SlimegachiInstance` are exported, with declarations emitted to `dist/types/`.
+- **New build outputs**: `dist/slimegachi.esm.js` (ES module) alongside the classic `dist/slimegachi.js`, which still exposes the `SLIMEgachi` global with `mount` and `version`.
+- **Build**: `scripts/build.js` now bundles with esbuild. `npm install` is required once (TypeScript, esbuild, Playwright — dev-only; the widget still has zero runtime dependencies).
+- **Smoke test**: `scripts/smoke.js` drives the built demo in headless Chromium — shelf, care screen, vitals rings, eye layers, care actions, leveling, both mini-games, modals, persistence, sleep / tap-to-wake.
+- **One-command release**: `npm run release` type-checks, builds, tests, copies the build into the deployed folder and bumps the cache busters for the files that changed.
+- **Mini-games share their reward code**: both games now report a score to one `completeMiniGame()` instead of each carrying a copy of the payout formula. Same numbers.
+
+Internal details an integrator might notice: the built file is bundler output rather than the hand-written source, and `SLIMEgachi` is declared with `var` at the top of the script instead of being assigned to `window` (equivalent in a classic `<script>`).
+
 ## 1.9.1 — care-screen visual fixes
 
 - **Vitals rings draw again**: the ring gauge's background referenced `--slimegachi-bg_top` (underscore) instead of `--slimegachi-bg-top`, which invalidated the whole declaration, so only the icon and number showed. The coloured ring and its track now render.

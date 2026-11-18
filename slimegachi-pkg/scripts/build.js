@@ -2,12 +2,19 @@
 /**
  * SLIMEgachi build script.
  * - Reads SVG art, encodes as base64 data URIs
- * - Embeds art into src/slimegachi.js, writes dist/slimegachi.js
- * - Copies src/slimegachi.css to dist/slimegachi.css
+ * - Bundles the TypeScript in src/ (entry: src/index.ts) with the art embedded:
+ *     dist/slimegachi.js      classic script, exposes the global `SLIMEgachi`
+ *     dist/slimegachi.esm.js  ES module (`import { mount } from ...`)
+ * - Emits type declarations to dist/types/
+ * - Writes dist/slimegachi.css (src/slimegachi.css with the webfonts embedded)
  * - Bundles a single-file dist/slimegachi.standalone.html for demo / sandbox use
+ *
+ * esbuild only strips types; run `npm run typecheck` (tsc) to check them.
  */
 const fs = require('fs');
 const path = require('path');
+const { execFileSync } = require('child_process');
+const esbuild = require('esbuild');
 
 const ROOT = path.resolve(__dirname, '..');
 const SRC = path.join(ROOT, 'src');
@@ -25,13 +32,53 @@ for (const pet of PETS) {
   const b64 = svg.toString('base64');
   artMap[pet] = 'data:image/svg+xml;base64,' + b64;
 }
-const artJson = JSON.stringify(artMap, null, 2);
 
-/* 2. Inject art into widget JS */
-const srcJs = fs.readFileSync(path.join(SRC, 'slimegachi.js'), 'utf8');
-const distJs = srcJs.replace('/*__EMBEDDED_PET_ART__*/ {}', artJson);
-fs.writeFileSync(path.join(DIST, 'slimegachi.js'), distJs);
+/* 2. Bundle the widget. The art map replaces `__EMBEDDED_PET_ART__` in
+      src/pet-art.ts. Output is left unminified so it stays readable. */
+const version = require(path.join(ROOT, 'package.json')).version;
+const banner = [
+  '/**',
+  ' * SLIMEgachi widget v' + version + ' — zero runtime dependencies.',
+  ' *',
+  ' * Usage:',
+  ' *   const game = SLIMEgachi.mount(container, options);',
+  ' *',
+  ' * Generated from src/*.ts by scripts/build.js — do not edit by hand.',
+  ' * See README.md for the full options/events contract.',
+  ' *',
+  ' * Browser support: any browser with ES2019 features (Safari 13+, Chrome 75+, Firefox 70+).',
+  ' */'
+].join('\n');
+const shared = {
+  entryPoints: [path.join(SRC, 'index.ts')],
+  bundle: true,
+  target: 'es2019',
+  charset: 'utf8',
+  legalComments: 'none',
+  define: { __EMBEDDED_PET_ART__: JSON.stringify(artMap) },
+  banner: { js: banner },
+  logLevel: 'warning'
+};
+esbuild.buildSync(Object.assign({}, shared, {
+  format: 'iife', globalName: 'SLIMEgachi', outfile: path.join(DIST, 'slimegachi.js')
+}));
+esbuild.buildSync(Object.assign({}, shared, {
+  format: 'esm', outfile: path.join(DIST, 'slimegachi.esm.js')
+}));
+const distJs = fs.readFileSync(path.join(DIST, 'slimegachi.js'), 'utf8');
+if (!distJs.includes("version = \"" + version + "\"")) {
+  throw new Error('src/index.ts version does not match package.json (' + version + ')');
+}
 console.log('✓ dist/slimegachi.js (' + distJs.length + ' bytes)');
+console.log('✓ dist/slimegachi.esm.js');
+
+/* 2b. Type declarations for consumers */
+fs.rmSync(path.join(DIST, 'types'), { recursive: true, force: true });
+execFileSync(process.execPath, [
+  path.join(ROOT, 'node_modules', 'typescript', 'bin', 'tsc'), '-p', ROOT,
+  '--noEmit', 'false', '--declaration', '--emitDeclarationOnly', '--outDir', path.join(DIST, 'types')
+], { stdio: 'inherit' });
+console.log('✓ dist/types/');
 
 /* 3. Embed webfonts as base64 @font-face so dist + standalone are fully
    self-contained (no external font requests). The faces match the family names

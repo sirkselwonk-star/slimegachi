@@ -3,6 +3,7 @@
 The full mechanics behind the game. This is the document to read when you're trying to remember why a number is what it is, or you're trying to design a new feature that needs to fit the existing system.
 
 For the integration contract (mount API, options, events), see the **README**.
+The code is TypeScript under `src/`: tuning numbers and tables are in `data.ts`, `leveling.ts` and `quests.ts`; the mini-games are in `minigames.ts`; everything stateful is in `instance.ts`.
 For adding a new pet, see **ADDING_A_PET.md**.
 
 ---

@@ -36,19 +36,44 @@ slimegachi/
 │   ├── GAME_DESIGN.md                  ← mechanics spec (decay, levels, quests)
 │   └── ADDING_A_PET.md                 ← runbook for adding a new pet
 ├── dist/
-│   ├── slimegachi.js                   ← drop-in widget (~165 KB)
-│   ├── slimegachi.css                  ← scoped styles (~30 KB)
+│   ├── slimegachi.js                   ← drop-in widget, classic script (global `SLIMEgachi`)
+│   ├── slimegachi.esm.js               ← the same widget as an ES module
+│   ├── types/                          ← TypeScript declarations (entry: index.d.ts)
+│   ├── slimegachi.css                  ← scoped styles, webfonts embedded
 │   └── slimegachi.standalone.html      ← single-file demo, no deps
-├── src/
-│   ├── slimegachi.js                   ← source for dist/slimegachi.js
+├── src/                                ← TypeScript source
+│   ├── index.ts                        ← entry: `mount`, `version`, public types
+│   ├── types.ts                        ← public contract + internal state types
+│   ├── instance.ts                     ← the widget instance (state, care loop, UI wiring)
+│   ├── minigames.ts                    ← Bubble Pop, Banana Catch
+│   ├── data.ts                         ← pet definitions, foods, achievements, speech, constants
+│   ├── quests.ts · leveling.ts         ← daily quest pool · level curve
+│   ├── audio.ts · icons.ts             ← synthesized SFX + music · inline SVG icons
+│   ├── template.ts                     ← widget markup
+│   ├── hedera.ts · storage.ts          ← default ownership lookup · default localStorage adapter
+│   ├── pet-art.ts · util.ts            ← embedded art hook · small helpers
 │   └── slimegachi.css                  ← source for dist/slimegachi.css
 ├── assets/
-│   └── pet-art/                        ← original SVG art (with named layers)
+│   ├── pet-art/                        ← original SVG art (with named layers)
+│   └── fonts/                          ← webfonts embedded into the CSS
 ├── examples/                           ← integration patterns
-└── scripts/build.js                    ← rebuild dist/ from src/
+└── scripts/                            ← build.js · smoke.js · sync-deploy.js
 ```
 
-Use the **`dist/` files** for integration. Edit the **`src/` files** if you want to customize, then run `node scripts/build.js` to rebuild dist.
+Use the **`dist/` files** for integration. Edit the **`src/` files** if you want to customize, then run `npm run build` to rebuild dist.
+
+### Using it from a bundler or TypeScript
+
+The classic script is the simplest route, but the same build is available as an ES module with full type declarations:
+
+```ts
+import { mount, version } from './dist/slimegachi.esm.js';
+import type { MountOptions, StorageAdapter, SlimegachiInstance } from './dist/types';
+
+const game: SlimegachiInstance = mount(container, { accountId: '0.0.12345' });
+```
+
+`MountOptions`, `StorageAdapter`, `GetOwnedPets`, `OwnedPet`, `EventHooks` / `EventPayloads` and `StateSnapshot` describe everything in this README as types; `src/types.ts` is the readable source for them. Remember to load `dist/slimegachi.css` as well.
 
 The standalone HTML is for demos and the Claude sandbox preview — it inlines everything into a single file.
 
@@ -138,7 +163,7 @@ The `getState()` snapshot shape:
 }
 ```
 
-`SLIMEgachi.version` is a string on the namespace, useful for debugging compatibility (`'1.9.1'` at the time of writing).
+`SLIMEgachi.version` is a string on the namespace, useful for debugging compatibility (`'1.10.0'` at the time of writing).
 
 ---
 
@@ -448,7 +473,7 @@ Features:
 ## Versioning
 
 ```js
-SLIMEgachi.version  // → '1.9.1'
+SLIMEgachi.version  // → '1.10.0'
 ```
 
 The widget follows semver loosely: minor versions add features without breaking the public API; saved player data backfills missing fields with safe defaults across versions. See `CHANGELOG.md` for the full history.
@@ -458,10 +483,19 @@ The widget follows semver loosely: minor versions add features without breaking 
 ## Rebuilding from source
 
 ```bash
-node scripts/build.js
+npm install                      # once: TypeScript, esbuild, Playwright (dev only)
+npx playwright install chromium  # once: browser for the smoke test
+npm test                         # typecheck + build + smoke test
 ```
 
-Produces `dist/slimegachi.js`, `dist/slimegachi.css`, and `dist/slimegachi.standalone.html` from sources. No npm dependencies for the build itself.
+| Command | What it does |
+|---------|--------------|
+| `npm run typecheck` | `tsc --noEmit` in strict mode |
+| `npm run build` | Bundles `src/index.ts` with esbuild into `dist/slimegachi.js` (classic script) and `dist/slimegachi.esm.js`, emits `dist/types/`, writes `dist/slimegachi.css` and the standalone HTML. Pet art and fonts are embedded. |
+| `npm run smoke` | Drives the standalone demo in headless Chromium and checks the main flows. `-- --full` adds a whole 30-second mini-game round. |
+| `npm test` | All three, in that order |
+
+The widget itself still has **zero runtime dependencies**; the packages above are build-time only. `version` in `package.json` and `src/index.ts` must match — the build fails if they don't.
 
 ---
 
