@@ -2685,6 +2685,7 @@
       wakePet(p);
       spawnActionFeedback('*yawn*', false);
       renderStats();
+      scheduleBlink();   /* open the eyes now rather than on the next 4s sleep re-check */
       scheduleNextBubble();
       persist();
     });
@@ -2809,7 +2810,7 @@
 
   /* Public namespace */
   global.SLIMEgachi = {
-    version: '1.9.0',
+    version: '1.9.1',
     mount(container, options) {
       if (!container) throw new Error('SLIMEgachi.mount: container is required');
       return createInstance(container, options || {});

@@ -93,6 +93,10 @@ There's a Python script approach the project has used before — see `/home/clau
 </g>
 <!-- Same for right -->
 
+<!-- Eye highlights (white catch-light dots) that sit outside the wrapper must
+     also carry class="sg-eye-open", or they float over the closed-eye line -->
+<ellipse class="sg-eye-open" .../>
+
 <!-- Mouth (wrap the existing mouth path) -->
 <g class="sg-mouth" style="transform-box:fill-box;transform-origin:center">
   <path .../>  <!-- original mouth -->

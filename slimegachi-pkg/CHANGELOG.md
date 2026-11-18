@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.1 — care-screen visual fixes
+
+- **Vitals rings draw again**: the ring gauge's background referenced `--slimegachi-bg_top` (underscore) instead of `--slimegachi-bg-top`, which invalidated the whole declaration, so only the icon and number showed. The coloured ring and its track now render.
+- **No dots over closed eyes**: Kitten's and Monkey's white eye highlights sat outside the `sg-eye-open` groups and stayed visible while asleep or blinking. They now carry the `sg-eye-open` class and hide with the rest of the open eye.
+- **Tap-to-wake opens the eyes immediately**: the wake handler now reschedules the blink, instead of leaving the eyes shut for up to 4 s until the next sleep re-check.
+
 ## 1.9.0 — demo polish
 
 Gameplay fairness fixes, a custom icon system and a long UI polish pass. No changes to the mount API, options, or public events.
