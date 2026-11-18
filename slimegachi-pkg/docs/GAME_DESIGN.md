@@ -94,7 +94,9 @@ Opens the shop sub-modal with available foods. Each food applies:
 
 **Favorite food bonus**: 1.5× multiplier on Hunger, Happy, and Clean changes. Each pet has one favorite food set in `PET_DEFS`.
 
-**Wrong-time penalty**: feeding during a pet's sleep window applies 0.5× multiplier and triggers a "(sleepy)" feedback string.
+**Wrong-time penalty**: feeding while the pet is asleep applies 0.5× multiplier and triggers a "(sleepy)" feedback string.
+
+**Care credit**: a feed only counts toward [leveling](#pet-leveling) when hunger was below 60 beforehand, or when Medicine cures a pet that was actually sick.
 
 ### Play (launches mini-game)
 
@@ -120,17 +122,23 @@ Static effect on active pet: +40 Energy.
 
 **Sleep window bonus**: doing Sleep during the pet's sleep window applies 1.5× to the boost (so +60 Energy) and grants +3 coins ("tucked in" bonus).
 
-**Wrong-time penalty**: doing Sleep when it's *not* the sleep window applies 0.5× and small Happy penalty (−3). Pet is annoyed.
+**Care credit**: Sleep only counts toward [leveling](#pet-leveling) when energy was below 60 beforehand.
 
 ### Clean
 
 Static effect on active pet: +40 Clean, −2 Happy (cleaning isn't fun).
 
-Same wrong-time multipliers as Sleep.
+**Wrong-time penalty**: cleaning while the pet is asleep applies 0.5× to the boost and a small Happy penalty (−3).
+
+**Care credit**: Clean only counts toward [leveling](#pet-leveling) when clean was below 60 beforehand.
 
 ---
 
 ## Mini-games
+
+Both game loops are frame-rate independent: movement and spawn timers are scaled by real delta-time, normalised to 60 fps and clamped at 100 ms per frame (so a backgrounded tab doesn't jump). A `dt *= 4` multiplier in each loop sets the overall pace — 4× the original speed — and scales fall/rise speed and spawn cadence together.
+
+The topbar back button is hidden while a mini-game or its results screen is showing; the only exits are the in-game Exit and "Back to Pet" buttons.
 
 ### Bubble Pop (Kitten's favorite)
 
@@ -150,9 +158,9 @@ Bubbles missed (drift off top) just disappear, no penalty.
 
 | Item    | Probability | Points | Visual              |
 |---------|-------------|--------|---------------------|
-| Banana  | 80%         | +5     | 🍌                  |
-| Rotten  | 15%         | −8     | 🦟 (penalty — avoid) |
-| Golden  | 5%          | +15    | ⭐ (bonus star)      |
+| Banana  | 80%         | +5     | Banana icon         |
+| Rotten  | 15%         | −8     | Sick icon (penalty — avoid) |
+| Golden  | 5%          | +15    | Star icon (bonus)   |
 
 Items hitting the basket between Y `basketY` and `basketY + 30` and within the basket's X range get caught. Missed items disappear.
 
@@ -180,9 +188,9 @@ Each pet has unique `skyDay` and `skyDusk` color pairs (top + bottom of the back
 
 ### Sleep windows
 
-Per-pet hour ranges. Within the window:
+Per-pet hour ranges. While the pet is asleep:
 - Sleep action gets a 1.5× bonus and +3 coins
-- Other actions get a 0.5× penalty + small Happy hit
+- Feed and Clean get a 0.5× penalty; Clean also takes a small Happy hit
 - Pet image renders with sleep filter (dimmed)
 - Eyes stay closed (overrides blink)
 - Speech draws from the `sleepy` line pool
@@ -195,6 +203,12 @@ Per-pet hour ranges. Within the window:
 | Dragon | 03:00–05:00  | Dragons barely sleep |
 
 A pet with energy < 15 will also stay closed-eyed even outside its window — exhausted regardless.
+
+### Tap-to-wake
+
+Tapping a sleeping pet on the care screen wakes it (a "*yawn*" floater) until the next occurrence of its sleep-window start hour. The override is stored per pet as `awakeUntil` (a timestamp) and persisted, so it survives a refresh. While it is in force the pet counts as awake everywhere — no sleep filter, no wrong-time penalties, and no sleep-window bonus on the Sleep action.
+
+Code should always ask `petSleeping(p)` (schedule + override), not the raw schedule check `isPetSleeping(petId)`.
 
 ---
 
@@ -239,7 +253,9 @@ Achievements fire once and can't be re-earned. Player progress is checked passiv
 
 ## Pet Leveling
 
-Each pet has a `care_count` that increments on every care action (any of Feed/Play/Sleep/Clean). Crossing a threshold triggers a milestone.
+Each pet has a `care_count` that increments on Feed, Sleep and Clean actions that meet a genuine need. Play (mini-games) does not add to it. Crossing a threshold triggers a milestone.
+
+**Care credit (anti-spam):** an action only increments `care_count` when the relevant stat was below 60 beforehand — hunger for Feed, energy for Sleep, clean for Clean (`FEED_CARE_THRESHOLD` / `SLEEP_CARE_THRESHOLD` / `CLEAN_CARE_THRESHOLD`). Medicine also counts when it cures a pet that was actually sick. Topping up an already-satisfied pet still applies the stat boost but earns no level progress, so the free Clean / Sleep / Snack buttons can't be spammed for levels. Quests, achievements and collection counters are not gated — they see every action.
 
 | Level | Threshold (actions) | Coin reward |
 |-------|---------------------|-------------|
@@ -259,7 +275,7 @@ Each level grants a permanent 1% decay reduction (multiplicative with other modi
 
 A milestone triggers:
 - Coin payout
-- 🎉⬆️ emote burst
+- Party + up-arrow emote burst
 - "Lv X!" floater on the pet
 - Internal `milestone` event (collection counter increments)
 
@@ -332,14 +348,18 @@ Events check every 60 seconds while on the care screen. Only one event active at
 
 ## Persistence
 
-State is saved to `localStorage` under the key `slimegachi:{accountId}:v1` (or `slimegachi:stub:v1` for demo mode). Writes are debounced (~800ms) after any mutation. Pluggable via the `storage` option for backend storage.
+State is saved through the `storage` adapter (default: `localStorage`, namespaced `slimegachi`) under two kinds of key, so a pet's care history follows the NFT rather than the wallet. Writes are debounced (~800ms) after any mutation.
 
-**Persisted state shape:**
+**Per-pet record** — key `pet:{tokenId}:{serial}` (demo mode: `demo:pet:{tokenId}:{serial}`, so demo play never collides with a real holder's record):
+
+```js
+{ stats, lastTick, sick, care_count, awakeUntil, name }
+```
+
+**Per-player record** — key `player:{accountId}` (demo mode: `player:stub`):
 
 ```js
 {
-  pets:              { [petKey]: { stats, lastTick, name, pet, serial, traits, sick, care_count }, ... },
-  activeKey:         string | null,
   coins:             number,
   achievements:      { [id]: { unlockedAt, claimed }, ... },
   lastLoginDay:      'YYYY-MM-DD' | null,
@@ -349,6 +369,8 @@ State is saved to `localStorage` under the key `slimegachi:{accountId}:v1` (or `
   collection:        { totalActions, foodsTried, gamesPlayed, milestonesReached }
 }
 ```
+
+The two mute preferences (`slimegachi:muted`, `slimegachi:music-muted`) are written straight to `localStorage`, outside the adapter. Loading the demo page with `?reset=1` clears every `slimegachi*` localStorage key before mount.
 
 When loading a save from an older version, missing keys backfill with safe defaults — existing players don't lose data when new features ship.
 
@@ -362,9 +384,11 @@ Cross-cutting game systems (quests, leveling, collection) subscribe to an intern
 
 | Event                | Payload                                                            | Emitted by                  |
 |----------------------|--------------------------------------------------------------------|------------------------------|
-| `care_action`        | `{ action, food?, isFavoriteFood?, petSerial, petType, petKey }`   | `applyAction`, `applyFood`   |
+| `care_action`        | `{ action, food?, isFavoriteFood?, petSerial, petType, petKey, rewardsCare }` | `applyAction`, `applyFood`   |
 | `minigame_complete`  | `{ game, score, forfeit }`                                         | Each mini-game `stop()`      |
 | `milestone`          | `{ petKey, level, reward }`                                        | Leveling on threshold cross  |
+
+`rewardsCare` is `false` when the action didn't meet a genuine need (see [Pet Leveling](#pet-leveling)). Only the leveling listener checks it; a new listener that grants progression should check it too.
 
 When adding a new system that needs to react to game events, subscribe to these rather than instrumenting the action handlers directly. New events should be added here (and documented) when needed.
 
@@ -379,13 +403,22 @@ Background colors are driven by the pet's `skyDay` / `skyDusk` palettes plus the
 | `--slimegachi-accent`    | Primary brand color              |
 | `--slimegachi-coin`      | Currency display, achievements   |
 | `--slimegachi-text`      | Main text                        |
-| `--slimegachi-muted`     | Secondary text                   |
+| `--slimegachi-muted`     | Secondary text (off-white, same as text by default) |
+| `--slimegachi-locked`    | Locked pet-card text (light purple) |
 | `--slimegachi-dim`       | Tertiary text                    |
 | `--slimegachi-danger`    | Low-stat warnings                |
 | `--slimegachi-success`   | Positive feedback                |
 | `--slimegachi-favorite`  | Favorite-item highlight          |
 
 All overridable via the `theme` option to `mount()`.
+
+**Typography.** Two font tokens, `--slimegachi-font-display` and `--slimegachi-font-ui`, both resolve to White Rabbit with JetBrains Mono and the platform monospace as fallbacks. The build embeds both faces as base64 `@font-face` rules in `dist/slimegachi.css` and the standalone HTML, so the package needs no external font requests.
+
+**Icons.** There are no OS emoji in the UI. Chrome icons (topbar, vitals, nav, care actions) are monochrome inline-SVG line icons drawn with `currentColor`; content icons (foods, achievements, events, emotes, mini-game sprites) are flat-colour SVGs with a dark outline to match the pets.
+
+**Adaptive HUD.** The care-screen info column and vitals use `--slimegachi-hud-*` tokens. `applyTimeTint()` measures the current sky's luminance and toggles `.slimegachi-lightsky` on the root when it is bright (e.g. Kitten/Monkey daytime), flipping the HUD ink to dark-on-light. Dark gradient scrims sit behind the top controls and the bottom action bar so they stay readable on any sky.
+
+**Care-screen layout.** Topbar: wordmark (with the `DEMO` badge beneath it in demo mode) on the left; sound, music and back buttons on the right. Info column upper-left: name line, level with progress dots, coin count, and a `STATUS:` mood line. The pet is centred in the stage. The four vitals are a centred row of ring gauges between the floor divider and the action buttons. On the shelf the coin count returns to the topbar.
 
 ---
 
@@ -400,13 +433,13 @@ Driven by per-frame math in the animation loop. No frame-by-frame sprite work �
 | Mouth chew      | `abs(sin(phase × 6)) × 1.2`, ~900ms duration        |
 | Mouth talk      | `abs(sin(phase × 4)) × 0.5`, ~3.5s duration         |
 | Wobble on clean | `sin(elapsed × 6) × 5°`                             |
-| Happy head sway | After Thriving > 1.5s: `sin(t × 1.6) × 3°` rotation |
+| Happy head sway | After Thriving > 5s: `sin(t × 1.6) × 3°` rotation   |
 | Blink           | 3–7.5s random intervals + 25% double-blink chance   |
 | Pupil tracking  | Eased 12%/frame follow toward pointer, clamped to 80% socket |
 
 Sleeping or low-energy pets stay closed-eyed. Sick state shows green-tint filter on top of mood filter.
 
-Emote floaters (📜🎉💖 etc.) are pure DOM elements drifting up from above the pet, animated by CSS `@keyframes slimegachi-emote-rise`. Used for: favorite-food rewards, achievement bursts, level-ups, action confirmations, idle happy moments.
+Emote floaters (heart, star, party, Zzz, droplet etc. — SVG icons, keyed internally by their legacy emoji) are pure DOM elements drifting up from above the pet, animated by CSS `@keyframes slimegachi-emote-rise`. Used for: favorite-food rewards, achievement bursts, level-ups, action confirmations, idle happy moments.
 
 ---
 
@@ -437,7 +470,7 @@ Short chiptune cues built from enveloped oscillators. Most are wired off the [in
 | `gameover` | Mini-game ends (not forfeit) | `onInternal('minigame_complete')` |
 | `click` | Nav / open / close / shelf buttons | delegated capture-phase listener (excludes the care bar + food picker so cues never double) |
 
-Mute: 🔊 topbar button → `localStorage['slimegachi:muted']`.
+Mute: sound (speaker) topbar button → `localStorage['slimegachi:muted']`.
 
 ### Music (`musicBus`)
 
@@ -453,7 +486,7 @@ Each theme is a tiny spec — `bpm`, tonic `root` (Hz), a 4-chord `prog` (chord-
 
 Scene selection is centralized in `musicForCurrentView()`, called from `enterCare` / `backToShelf` / `launchMiniGame` / `closeMiniGame` and the first-gesture handler; it maps `State.view` (+ active pet/game) to `Music.setScene(view, variant)`.
 
-Mute: 🎵 topbar button → `localStorage['slimegachi:music-muted']` (independent of SFX; when muted the scheduler stops entirely). Music sits below SFX in the mix (`ACTIVE_GAIN`).
+Mute: music (note) topbar button → `localStorage['slimegachi:music-muted']` (independent of SFX; when muted the scheduler stops entirely). Music sits below SFX in the mix (`ACTIVE_GAIN`).
 
 ---
 
@@ -479,6 +512,8 @@ Some of the constants are tuning, but a few have downstream consequences:
 - **`PASSIVE_DECAY_MULTIPLIER` (0.4)** — if you raise this, shelf pets neglect themselves much faster. Players will hate it.
 - **Mood thresholds (30 / 75)** — if you narrow these, "Thriving" becomes unreachable and the `whisperer` achievement gets locked away.
 - **Level thresholds** — the curve is intentionally steep at the end (140 → 200 → 280) so Lv 10 represents real long-term dedication. Flattening the curve cheapens it.
+- **Mini-game speed (`dt *= 4`)** — sets how many items a player can reach in 30s, so it moves scores, coin payouts and the 100+ Master badges together with the duration.
+- **Care thresholds (60)** — the stat level below which Feed / Sleep / Clean earn level progress. Raising them makes leveling trivially spammable again; lowering them makes Lv 10 much slower.
 - **Mini-game duration (30s)** — calibrated against the coin payout formula. Shortening means rewards drop proportionally; lengthening means it becomes a chore.
 - **Sleep window penalty (0.5×)** — strong enough to matter, gentle enough that a player who fed a pet at the wrong time isn't punished disproportionately.
 - **Owl sleep window (08:00–16:00)** — the inversion is the whole personality, not a number to tune.

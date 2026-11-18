@@ -24,7 +24,9 @@ body { display: flex; align-items: center; justify-content: center; }
      * remove → deletes. All async. The widget debounces writes (~800 ms)
      * so don't worry about being hammered.
      *
-     * Key shape: '{accountId}:v1' (or 'stub:v1' before wallet connects).
+     * Two key shapes: 'pet:{tokenId}:{serial}' (per-pet record) and
+     * 'player:{accountId}' (per-player record). Demo play before a wallet
+     * connects uses 'demo:pet:...' and 'player:stub'.
      */
 
     const apiBase = 'https://your-backend.example/api/slimegachi';

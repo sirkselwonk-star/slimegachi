@@ -2,7 +2,7 @@
 
 The deployable home of **Slimegachi**, a Tamagotchi-style virtual-pet game for the SLIME NFT collection on Hedera. (Filesystem name is `SLIME.PETS`; the product name is Slimegachi.) Part of the SLIME family of projects.
 
-`index.html` mounts the packaged Slimegachi widget — a zero-dependency, vanilla-JS game. Open it, click once (to unlock audio), and play: Kitten + Monkey are playable in stub mode; Owl + Dragon are locked mint-2 teasers.
+`index.html` mounts the packaged Slimegachi widget — a zero-dependency, vanilla-JS game. Open it, click once (to unlock audio), and play: Kitten + Monkey are playable in demo mode; Owl + Dragon are locked mint-2 teasers.
 
 ---
 
@@ -39,6 +39,8 @@ Then open http://localhost:8002/. (Port 8002 is SLIME.PETS' slot in the SLIME fa
 
 Audio (SFX + music) only starts after the first click — browser autoplay policy.
 
+Progress persists in the browser's `localStorage`. Load the page with `?reset=1` to wipe it and start from a clean Level-0 slate (the parameter is stripped from the URL afterwards).
+
 ---
 
 ## Make a change → ship it
@@ -56,6 +58,8 @@ cp slimegachi-pkg/dist/slimegachi.css slimegachi/slimegachi.css
 Then **bump the cache buster** in `index.html` — increment `?v=N` on the changed `<link>`/`<script>` tag(s). GitHub Pages serves stale modules otherwise. (Bump only what changed: CSS-only edit → bump the CSS tag.)
 
 `node --check slimegachi-pkg/dist/slimegachi.js` is a quick syntax gate before deploying.
+
+**Fonts:** `dist/slimegachi.css` embeds White Rabbit + JetBrains Mono as base64. The `slimegachi/slimegachi.css` currently deployed is the un-embedded `src` version, with `index.html` loading both fonts from CDN links instead. Copying the `dist` CSS as above makes the page self-contained (the CDN `<link>` tags then become redundant).
 
 ---
 

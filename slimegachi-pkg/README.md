@@ -127,7 +127,7 @@ The `getState()` snapshot shape:
 {
   account:      string | null,
   view:         'shelf' | 'care' | 'minigame',
-  activeKey:    string | null,        // e.g. 'stub-Kitten-274'
+  activeKey:    string | null,        // '{tokenId}-{serial}', e.g. '0.0.9474754-274'
   ownedPets:    [{ pet, serial, name, image, traits }, ...],
   coins:        number,
   loginStreak:  number,
@@ -322,13 +322,16 @@ Full list of overridable variables:
 | `accent`    | `#00a1d4`    | Buttons, highlights, mood    |
 | `coin`      | `#fed600`    | Currency, achievements       |
 | `text`      | `#f4ecd8`    | Main text                    |
-| `muted`     | `#a98ed4`    | Secondary text               |
+| `muted`     | `#f4ecd8`    | Secondary text               |
+| `locked`    | `#a98ed4`    | Locked pet-card text         |
 | `dim`       | `#6a5882`    | Tertiary / disabled text     |
 | `danger`    | `#ff5577`    | Low stat warnings, errors    |
 | `success`   | `#7fffd4`    | Positive state, free items   |
 | `favorite`  | `#ffb3d9`    | Pet's favorite items         |
 | `bg_top`    | `#2a1f3f`    | Background gradient top      |
 | `bg_bot`    | `#1a1428`    | Background gradient bottom   |
+
+Fonts: the UI uses White Rabbit, falling back to JetBrains Mono and then the platform monospace. `dist/slimegachi.css` and the standalone HTML embed both faces as base64 `@font-face` rules, so no external font requests are needed. If you serve `src/slimegachi.css` directly, load the two faces yourself or accept the fallback.
 
 Day/night cycle overrides `bg_top` and `bg_bot` automatically on the care screen. Per-pet sky palettes are baked into `PET_DEFS` inside the widget — if you need to change them, fork the source.
 
@@ -421,13 +424,13 @@ Mechanics depth (see `docs/GAME_DESIGN.md` for the full spec):
 
 - **Stats & decay**: four stats per pet, decay rates depend on pet and active/passive status. Sick state accelerates decay; pet level slows it
 - **Mood**: derived from average stat — Sad < 30 < Content < 75 < Thriving; or Sleepy when energy < 18
-- **Sleep windows**: each pet has hours when actions get bonuses/penalties; Owl is inverted (nocturnal)
+- **Sleep windows**: each pet has hours when actions get bonuses/penalties; Owl is inverted (nocturnal). Tapping a sleeping pet wakes it until its next bedtime
 
 Features:
 
 - **Mini-games**: Bubble Pop (Kitten's favorite) and Banana Catch (Monkey's favorite) — Owl/Dragon games come with mint 2. Each rewards Happy + Coins on a curve from score
 - **Daily Quests**: 3-quest slate refreshed at local midnight, pool of 9 templates. Coin rewards on claim; visual notification dot on shelf when claimable
-- **Pet leveling**: per-pet care_count drives 10 levels with thresholds at 5/12/22/35/50/70/100/140/200/280 actions. Each level grants coins + a permanent 1% decay reduction (cap 10%)
+- **Pet leveling**: per-pet care_count drives 10 levels with thresholds at 5/12/22/35/50/70/100/140/200/280 actions. Each level grants coins + a permanent 1% decay reduction (cap 10%). Only Feed / Sleep / Clean actions that meet a genuine need (stat below 60) count, so free actions can't be spammed for levels
 - **Collection**: career stats screen — actions taken, milestones reached, achievements unlocked, foods tried, mini-games played, pet types cared for, highest level, login streak
 - **Currency**: Coins earned from login streaks, mini-games, quest claims, level-ups, milestones, found-coin events; spent on food/toys
 - **Shop**: Snack (free), Burger, Banana, Cake, Medicine (cures Sick state), Toy Ball
@@ -436,6 +439,8 @@ Features:
 - **Random events**: Found a Coin, Pet is Sick, Treasure (5-day streak)
 - **Day/night cycle**: real local time drives sky tint and sleep windows
 - **Animation depth**: breathing math, mood-based filters, blink (3-7.5s intervals + occasional double-blink), pupil tracking (eyes follow cursor/touch), mouth chew on feed + talk on speech, happy head-sway when Thriving for >5s, emote floaters (favorite food, achievements, care actions)
+- **Audio**: synthesized chiptune sound effects and per-scene background music via the Web Audio API (no asset files), with independent mute toggles
+- **Icons**: custom inline-SVG icon set throughout — no OS emoji
 - **Persistence**: state survives reloads via localStorage by default; pluggable storage adapter for backend use
 
 ---
@@ -468,7 +473,6 @@ Produces `dist/slimegachi.js`, `dist/slimegachi.css`, and `dist/slimegachi.stand
 - **No multiplayer / cross-account features** — pet visiting, gifting, breeding, leaderboards
 - **Mintable badges have no claim flow** — buttons exist, are disabled until you wire your backend
 - **No on-chain achievements** — needs your wallet stack to actually airdrop NFT badges
-- **No sound** — design call for v1.x; Web Audio synth (no asset files) planned
 
 The architecture is built to extend cleanly into each of these. The internal event bus added in v1.5 (`emitInternal`/`onInternal`) makes adding new cross-cutting systems straightforward — see `docs/GAME_DESIGN.md` for the event taxonomy.
 

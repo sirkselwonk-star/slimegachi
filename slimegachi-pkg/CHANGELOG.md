@@ -1,5 +1,42 @@
 # Changelog
 
+## Unreleased — demo polish (since 1.8.0)
+
+Everything below landed after 1.8.0 was cut. `SLIMEgachi.version` still reads `'1.8.0'`; bump it when this is released. No changes to the mount API, options, or public events.
+
+### Gameplay
+
+- **Anti-spam care gate**: a care action only earns level progress (`care_count`) when it meets a genuine need — Clean when clean < 60, Sleep when energy < 60, Feed when hunger < 60 (or when Medicine cures a pet that was actually sick). Topping up an already-satisfied pet still applies the stat boost but earns no care credit, so the free Clean / Sleep / Snack buttons can't be spammed for levels. Thresholds are `CLEAN_CARE_THRESHOLD` / `SLEEP_CARE_THRESHOLD` / `FEED_CARE_THRESHOLD`. The internal `care_action` event carries a new `rewardsCare` boolean; only the leveling listener honours it (quests, achievements and collection still see every action).
+- **Tap-to-wake**: tapping a sleeping pet wakes it until its next scheduled bedtime, so a night-time visitor isn't stuck with an un-interactable pet. Stored per pet as `awakeUntil` (persisted, survives a refresh). All sleep checks go through `petSleeping(p)`, which layers the override on top of the time-of-day schedule.
+- **Mini-games are frame-rate independent**: Bubble Pop and Banana Catch now scale movement and spawn timers by real delta-time (normalised to 60 fps, clamped at 100 ms per frame) instead of a fixed per-frame step, fixing slow motion on low-fps mobile devices.
+- **Mini-game speed is 4×** the original pace (delta-time multiplier in both game loops). Duration (30 s) and the reward formulas are unchanged.
+- **Banana Catch sprites enlarged** (banana doubled; star and rotten item larger).
+- **Back button hidden during a mini-game and its results screen**, so the only exits are the in-game Exit and "Back to Pet" buttons.
+
+### Icons & typography
+
+- **No more OS emoji**: every emoji in the UI is replaced by a custom inline-SVG icon system. Chrome icons (topbar, vitals, nav, care actions) are monochrome line icons using `currentColor`; content icons (foods, achievements, events, floating emotes, mini-game sprites) are flat-colour with a dark outline to match the pets. The sound / music toggles swap to muted variants.
+- **White Rabbit everywhere**: `--slimegachi-font-ui` now points at White Rabbit as well as `--slimegachi-font-display`; JetBrains Mono remains the fallback. Non-button text is 2 px larger overall.
+- **SLIME-green accents**: remaining aqua text (mini-game result stats, level number, pet-card `#serial`, DEMO badge, back arrow) recoloured to the accent green.
+
+### Care screen layout (supersedes parts of 1.8.0)
+
+- **Vitals** are a centred row of ring gauges in the band between the floor divider and the action buttons — no longer the upper-left column described under 1.8.0. Gauges are larger.
+- **Coins** sit in the info column under the level on the care screen (back in the topbar on the shelf); the pill background is gone, leaving icon + number with a drop shadow.
+- **Info column**: name line, level (accent-green number, progress dots) and a status line now prefixed `STATUS:`, with drop shadows for legibility.
+- **Back button** lives in the topbar as the right-most control, next to the sound and music toggles.
+- **DEMO badge** reads just `DEMO` (was `STUB (DEMO)`) and sits under the wordmark.
+- **Dark scrims** behind the top controls and the bottom action bar (care screen and shelf) keep light text readable over bright daytime skies. Action buttons are accent green over bright skies.
+- Pet expressions and floating emotes are slightly larger.
+
+### Shelf
+
+- Larger "Your Pets" title and subtitle; subtitle copy and colour updated.
+
+### Demo page / packaging
+
+- **`?reset=1`**: loading `index.html` or `dist/slimegachi.standalone.html` with `?reset=1` wipes the `slimegachi*` localStorage keys before mount and then strips the parameter from the URL, giving any device a clean Level-0 start.
+
 ## 1.8.0 — care-screen layout pass
 
 Compact, restyled vitals and a tidier upper-left info column.
